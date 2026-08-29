@@ -33,7 +33,7 @@
       margin-bottom: 30px;
     }
 
-    .card-login { max-width: 400px; margin: 10vh auto; }
+    .card-menu { max-width: 500px; margin: 10vh auto; }
 
     /* PROGRESS BAR */
     .progress-container { position: sticky; top: 10px; z-index: 1000; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 25px; border-bottom: 3px solid var(--escola-ouro); }
@@ -43,8 +43,8 @@
     /* BOTÕES GERAIS */
     .btn-theme-primary { background: linear-gradient(145deg, #ff8226, #e65c00); color: #fff !important; border: none; transition: all 0.2s; font-weight: 700; }
     .btn-theme-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(230, 92, 0, 0.3); }
-    .btn-theme-outline { background: #fff; color: var(--escola-cinza-escuro); border: 1px solid #ccc; font-weight: 600; }
-    .btn-theme-outline:hover { background: var(--escola-creme); color: var(--escola-laranja); border-color: var(--escola-laranja); }
+    .btn-theme-outline { background: #fff; color: var(--escola-laranja); border: 2px solid var(--escola-laranja); font-weight: 700; transition: all 0.2s; }
+    .btn-theme-outline:hover { background: var(--escola-laranja); color: #fff; }
 
     /* FORMULÁRIOS */
     .form-control, .form-select { border-color: #ddd; padding: 10px 15px; border-radius: 8px; }
@@ -53,9 +53,9 @@
     .section-title { font-weight: 700; color: var(--escola-laranja); border-bottom: 2px solid var(--escola-ouro); padding-bottom: 8px; margin-bottom: 20px; margin-top: 30px; }
 
     /* CHECKLIST CUSTOMIZADO */
-    .checklist-item { background: #fff; border: 1px solid #ddd; padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; transition: all 0.2s; }
+    .checklist-item { background: #fff; border: 1px solid #ddd; padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; transition: all 0.2s; cursor: pointer; }
     .checklist-item:hover { border-color: var(--escola-laranja); background: var(--escola-creme); }
-    .form-check-input { width: 22px; height: 22px; cursor: pointer; margin-right: 10px; margin-top: 0; border-color: #bbb; }
+    .form-check-input { width: 22px; height: 22px; cursor: pointer; margin-right: 12px; margin-top: 0; border-color: #bbb; }
     .form-check-input:checked { background-color: var(--escola-laranja); border-color: var(--escola-laranja); }
     
     /* BLOCOS CONDICIONAIS (OCORRÊNCIAS) */
@@ -71,33 +71,19 @@
 </head>
 <body>
 
-  <!-- TELA DE LOGIN (ATENDENTE) -->
-  <div id="telaLogin" class="card-ui card-login text-center">
-    <i class="fas fa-clipboard-user fs-1 mb-3" style="color: var(--escola-laranja);"></i>
-    <h3 class="fw-bold text-dark mb-4">Portal de Triagem</h3>
-    <div class="mb-3 text-start">
-      <label>Nome do Atendente/Funcionário</label>
-      <input type="text" id="nomeAtendente" class="form-control" placeholder="Digite seu nome para registrar">
-    </div>
-    <div class="mb-4 text-start">
-      <label>Senha de Acesso</label>
-      <input type="password" id="senhaAcesso" class="form-control" placeholder="Senha da equipe" onkeypress="if(event.key==='Enter') login()">
-    </div>
-    <button class="btn btn-theme-primary w-100 py-2 fs-5" onclick="login()">ENTRAR</button>
-  </div>
-
   <!-- MENU PRINCIPAL -->
-  <div id="telaMenu" class="card-ui oculto text-center">
-    <h3 class="fw-bold mb-2">Painel de Triagem</h3>
-    <p class="text-muted mb-4">Atendente ativo: <span id="lblAtendenteAtivo" class="fw-bold text-dark"></span></p>
+  <div id="telaMenuInicial" class="card-ui card-menu text-center">
+    <i class="fas fa-clipboard-check fs-1 mb-3" style="color: var(--escola-laranja);"></i>
+    <h3 class="fw-bold text-dark mb-4">Portal de Triagem</h3>
+    <p class="text-muted mb-4 small">Selecione o seu perfil de acesso para continuar.</p>
     
-    <div class="row g-3">
-      <div class="col-md-6">
-        <button class="btn btn-theme-primary w-100 py-4 fs-5" onclick="abrirCheckin()"><i class="fas fa-user-check mb-2 fs-2 d-block"></i> Novo Check-in de Aluno</button>
-      </div>
-      <div class="col-md-6">
-        <button class="btn btn-dark w-100 py-4 fs-5" onclick="abrirPainelCGD()"><i class="fas fa-user-shield mb-2 fs-2 d-block"></i> Área da Coordenação (CGD)</button>
-      </div>
+    <div class="d-grid gap-3">
+      <button class="btn btn-theme-primary py-3 fs-5" onclick="tentarAcessoColaborador()">
+        <i class="fas fa-user-edit me-2"></i> Acesso do Colaborador
+      </button>
+      <button class="btn btn-theme-outline py-3 fs-5" onclick="tentarAcessoRestrito()">
+        <i class="fas fa-user-shield me-2"></i> Área Restrita
+      </button>
     </div>
   </div>
 
@@ -105,8 +91,8 @@
   <div id="telaCheckin" class="oculto">
     <div class="progress-container card-ui mb-3" style="padding: 15px 20px;">
       <div class="d-flex justify-content-between mb-2">
-        <span class="fw-bold text-dark">Progresso do Check-in</span>
-        <span class="fw-bold text-theme" id="txtProgresso">0%</span>
+        <span class="fw-bold text-dark">Progresso da Triagem</span>
+        <span class="fw-bold text-theme" id="txtProgresso" style="color:var(--escola-laranja);">0%</span>
       </div>
       <div class="progress shadow-sm">
         <div id="barraProgresso" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%;"></div>
@@ -114,65 +100,65 @@
     </div>
 
     <div class="card-ui">
-      <div class="d-flex justify-content-between align-items-center">
-        <h4 class="fw-bold m-0"><i class="fas fa-id-card text-theme me-2" style="color:var(--escola-laranja);"></i> Triagem de Primeiro Dia</h4>
-        <button class="btn btn-sm btn-outline-secondary" onclick="voltarMenu()"><i class="fas fa-arrow-left"></i> Voltar</button>
+      <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+        <h4 class="fw-bold m-0"><i class="fas fa-id-card text-theme me-2" style="color:var(--escola-laranja);"></i> Check-in de Matrícula</h4>
+        <button class="btn btn-sm btn-outline-secondary" onclick="voltarMenu()"><i class="fas fa-arrow-left"></i> Sair</button>
       </div>
 
-      <!-- ETAPA 1: DADOS CADASTRAIS -->
-      <h5 class="section-title"><i class="fas fa-user-edit me-2"></i> 1. Dados do Aluno(a)</h5>
-      <div class="row g-3">
-        <div class="col-md-8"><label>Nome do Aluno(a) *</label><input type="text" id="cNome" class="form-control tracker"></div>
-        <div class="col-md-4"><label>Data de Nascimento *</label><input type="date" id="cNasc" class="form-control tracker"></div>
-        <div class="col-md-4"><label>CPF do Aluno(a) *</label><input type="text" id="cCpf" class="form-control tracker" placeholder="000.000.000-00"></div>
-        <div class="col-md-4"><label>Escola que estuda *</label><input type="text" id="cEscola" class="form-control tracker" placeholder="Nome da escola"></div>
-        <div class="col-md-4"><label>Período que estuda *</label>
-          <select id="cPeriodo" class="form-select tracker">
-            <option value="">Selecione...</option><option value="Manhã">Manhã</option><option value="Tarde">Tarde</option><option value="Noite">Noite</option><option value="Integral">Integral</option><option value="Não estuda">Não estuda</option>
-          </select>
+      <div class="bg-light p-3 rounded border mb-4">
+        <p class="text-muted small mb-3"><i class="fas fa-info-circle text-primary"></i> Atendente ativo: <strong id="lblAtendenteAtivo" class="text-dark"></strong></p>
+        <div class="row g-3">
+          <div class="col-md-4"><label>Matrícula *</label><input type="text" id="cMatricula" class="form-control tracker" placeholder="Nº da Matrícula"></div>
+          <div class="col-md-8"><label>Nome do Aluno(a) *</label><input type="text" id="cNome" class="form-control tracker" placeholder="Nome completo"></div>
         </div>
-        <div class="col-md-6"><label>E-mail do Aluno(a)</label><input type="email" id="cEmailAluno" class="form-control tracker"></div>
-        <div class="col-md-6"><label>E-mail do Responsável</label><input type="email" id="cEmailResp" class="form-control tracker"></div>
-        <div class="col-md-4"><label>Telefone do Aluno(a) *</label><input type="text" id="cTelAluno" class="form-control tracker" placeholder="(00) 00000-0000"></div>
-        <div class="col-md-4"><label>Telefone do Responsável *</label><input type="text" id="cTelResp" class="form-control tracker" placeholder="(00) 00000-0000"></div>
-        <div class="col-md-4"><label>Telefone de Emergência *</label><input type="text" id="cTelEmerg" class="form-control tracker" placeholder="(00) 00000-0000"></div>
+      </div>
+
+      <!-- ETAPA 1: CONFERÊNCIA CGD -->
+      <h5 class="section-title"><i class="fas fa-check-double me-2"></i> 1. Conferência de Dados (CGD)</h5>
+      <p class="text-muted small mb-3">Marque os itens que estão corretos e preenchidos no sistema CGD.</p>
+      
+      <div class="row g-2 mb-4">
+        <div class="col-md-6"><label class="checklist-item"><input type="checkbox" id="chkNasc" class="form-check-input tracker"> Data de Nascimento correta</label></div>
+        <div class="col-md-6"><label class="checklist-item"><input type="checkbox" id="chkCpf" class="form-check-input tracker"> CPF cadastrado</label></div>
+        <div class="col-md-6"><label class="checklist-item"><input type="checkbox" id="chkEscola" class="form-check-input tracker"> Nome da Escola / Período</label></div>
+        <div class="col-md-6"><label class="checklist-item"><input type="checkbox" id="chkEmailAluno" class="form-check-input tracker"> E-mail do Aluno(a)</label></div>
+        <div class="col-md-6"><label class="checklist-item"><input type="checkbox" id="chkEmailResp" class="form-check-input tracker"> E-mail do Responsável</label></div>
+        <div class="col-md-6"><label class="checklist-item"><input type="checkbox" id="chkTelAluno" class="form-check-input tracker"> Telefone do Aluno(a)</label></div>
+        <div class="col-md-6"><label class="checklist-item"><input type="checkbox" id="chkTelResp" class="form-check-input tracker"> Telefone do Responsável</label></div>
+        <div class="col-md-6"><label class="checklist-item"><input type="checkbox" id="chkTelEmerg" class="form-check-input tracker"> Telefone de Emergência</label></div>
       </div>
 
       <!-- ETAPA 2: PROTOCOLO / CHECKLIST -->
       <h5 class="section-title"><i class="fas fa-tasks me-2"></i> 2. Protocolo de Acolhimento</h5>
       <div id="areaChecklist">
-        <!-- Gerado via JS para facilitar contagem -->
+        <!-- Gerado via JS -->
       </div>
 
       <!-- ETAPA 3: VALIDAÇÃO E OCORRÊNCIAS (CGD) -->
-      <h5 class="section-title"><i class="fas fa-shield-alt me-2"></i> 3. Validação da Matrícula (CGD)</h5>
+      <h5 class="section-title"><i class="fas fa-shield-alt me-2"></i> 3. Validação de Matrícula</h5>
       
       <div class="row g-3">
-        <!-- Dia do Curso -->
         <div class="col-md-12 bg-light p-3 rounded border mb-2">
           <label class="mb-2 d-block text-dark">O Dia do Curso está correto conforme o contrato? *</label>
           <div class="form-check form-check-inline"><input class="form-check-input rad-ocorrencia tracker" type="radio" name="radDia" id="diaSim" value="OK" onchange="toggleOcorrencia('obsDia', false)"><label class="form-check-label" for="diaSim">Sim</label></div>
           <div class="form-check form-check-inline"><input class="form-check-input rad-ocorrencia tracker" type="radio" name="radDia" id="diaNao" value="OCORRENCIA" onchange="toggleOcorrencia('obsDia', true)"><label class="form-check-label" for="diaNao">Não</label></div>
-          <div id="obsDia" class="bloco-ocorrencia oculto"><label class="text-danger"><i class="fas fa-exclamation-triangle"></i> Descreva o problema para o CGD:</label><input type="text" class="form-control" id="txtObsDia" placeholder="Ex: Aluno quer trocar de terça para quinta"></div>
+          <div id="obsDia" class="bloco-ocorrencia oculto"><label class="text-danger"><i class="fas fa-exclamation-triangle"></i> Gerar Ocorrência CGD:</label><input type="text" class="form-control" id="txtObsDia" placeholder="Ex: Aluno quer trocar de terça para quinta"></div>
         </div>
 
-        <!-- Horário -->
         <div class="col-md-12 bg-light p-3 rounded border mb-2">
           <label class="mb-2 d-block text-dark">O Horário do Curso está correto? *</label>
           <div class="form-check form-check-inline"><input class="form-check-input rad-ocorrencia tracker" type="radio" name="radHorario" id="horaSim" value="OK" onchange="toggleOcorrencia('obsHora', false)"><label class="form-check-label" for="horaSim">Sim</label></div>
           <div class="form-check form-check-inline"><input class="form-check-input rad-ocorrencia tracker" type="radio" name="radHorario" id="horaNao" value="OCORRENCIA" onchange="toggleOcorrencia('obsHora', true)"><label class="form-check-label" for="horaNao">Não</label></div>
-          <div id="obsHora" class="bloco-ocorrencia oculto"><label class="text-danger"><i class="fas fa-exclamation-triangle"></i> Descreva o problema para o CGD:</label><input type="text" class="form-control" id="txtObsHora" placeholder="Ex: Veio no turno da manhã mas era tarde"></div>
+          <div id="obsHora" class="bloco-ocorrencia oculto"><label class="text-danger"><i class="fas fa-exclamation-triangle"></i> Gerar Ocorrência CGD:</label><input type="text" class="form-control" id="txtObsHora" placeholder="Ex: Veio no turno da manhã mas era tarde"></div>
         </div>
 
-        <!-- Pacote -->
         <div class="col-md-12 bg-light p-3 rounded border mb-2">
           <label class="mb-2 d-block text-dark">O Pacote do Curso (Disciplinas) está correto? *</label>
           <div class="form-check form-check-inline"><input class="form-check-input rad-ocorrencia tracker" type="radio" name="radPacote" id="pacSim" value="OK" onchange="toggleOcorrencia('obsPac', false)"><label class="form-check-label" for="pacSim">Sim</label></div>
           <div class="form-check form-check-inline"><input class="form-check-input rad-ocorrencia tracker" type="radio" name="radPacote" id="pacNao" value="OCORRENCIA" onchange="toggleOcorrencia('obsPac', true)"><label class="form-check-label" for="pacNao">Não</label></div>
-          <div id="obsPac" class="bloco-ocorrencia oculto"><label class="text-danger"><i class="fas fa-exclamation-triangle"></i> Descreva o problema para o CGD:</label><input type="text" class="form-control" id="txtObsPac" placeholder="Ex: Não tem informática no pacote atual"></div>
+          <div id="obsPac" class="bloco-ocorrencia oculto"><label class="text-danger"><i class="fas fa-exclamation-triangle"></i> Gerar Ocorrência CGD:</label><input type="text" class="form-control" id="txtObsPac" placeholder="Ex: Não tem informática no pacote atual"></div>
         </div>
 
-        <!-- Pós Venda -->
         <div class="col-md-12 bg-light p-3 rounded border mb-2">
           <label class="mb-2 d-block text-dark">Existem pendências Registradas do Pós-venda nesta matrícula? *</label>
           <div class="form-check form-check-inline"><input class="form-check-input rad-ocorrencia tracker" type="radio" name="radPos" id="posNao" value="OK" onchange="toggleOcorrencia('obsPos', false)"><label class="form-check-label" for="posNao">Não (Tudo Certo)</label></div>
@@ -181,43 +167,39 @@
           <small class="d-block mt-1 text-danger fw-bold">Atenção: Solicite imediatamente a regularidade dos documentos ao aluno(a)/responsável.</small></div>
         </div>
 
-        <!-- Cuidados Especiais -->
         <div class="col-md-12 bg-light p-3 rounded border mb-2">
           <label class="mb-2 d-block text-dark">Esse aluno necessita de Cuidados Especiais (Saúde/Aprendizagem)? *</label>
           <div class="form-check form-check-inline"><input class="form-check-input rad-ocorrencia tracker" type="radio" name="radCuidados" id="cuidNao" value="OK" onchange="toggleOcorrencia('obsCuid', false)"><label class="form-check-label" for="cuidNao">Não</label></div>
           <div class="form-check form-check-inline"><input class="form-check-input rad-ocorrencia tracker" type="radio" name="radCuidados" id="cuidSim" value="OCORRENCIA" onchange="toggleOcorrencia('obsCuid', true)"><label class="form-check-label" for="cuidSim">Sim</label></div>
-          <div id="obsCuid" class="bloco-ocorrencia oculto"><label class="text-danger"><i class="fas fa-exclamation-triangle"></i> Descreva os cuidados (Isso gerará uma Tag no CGD):</label><input type="text" class="form-control" id="txtObsCuid" placeholder="Ex: Possui TDAH ou Alergia a amendoim"></div>
+          <div id="obsCuid" class="bloco-ocorrencia oculto"><label class="text-danger"><i class="fas fa-exclamation-triangle"></i> Descreva (Isso gerará uma Tag no CGD):</label><input type="text" class="form-control" id="txtObsCuid" placeholder="Ex: Possui TDAH ou Alergia a amendoim"></div>
         </div>
 
-        <!-- Ocorrência Geral -->
         <div class="col-md-12 bg-light p-3 rounded border mb-2">
           <label class="mb-2 d-block text-dark">Existe mais alguma ocorrência geral nesta matrícula? *</label>
           <div class="form-check form-check-inline"><input class="form-check-input rad-ocorrencia tracker" type="radio" name="radGeral" id="geralNao" value="OK" onchange="toggleOcorrencia('obsGeral', false)"><label class="form-check-label" for="geralNao">Não</label></div>
           <div class="form-check form-check-inline"><input class="form-check-input rad-ocorrencia tracker" type="radio" name="radGeral" id="geralSim" value="OCORRENCIA" onchange="toggleOcorrencia('obsGeral', true)"><label class="form-check-label" for="geralSim">Sim</label></div>
           <div id="obsGeral" class="bloco-ocorrencia oculto"><label class="text-danger"><i class="fas fa-exclamation-triangle"></i> Descreva a ocorrência:</label><input type="text" class="form-control" id="txtObsGeral" placeholder="Relate o problema..."></div>
         </div>
-
       </div>
 
       <div class="mt-4 border-top pt-4">
         <button id="btnEnviar" class="btn btn-theme-primary w-100 py-3 fs-5" onclick="enviarCheckin()"><i class="fas fa-paper-plane me-2"></i> Finalizar Check-in e Enviar</button>
       </div>
-
     </div>
   </div>
 
-  <!-- TELA DE RESULTADO (PARABÉNS OU AVISO) -->
+  <!-- TELA DE RESULTADO -->
   <div id="telaResultado" class="card-ui text-center oculto py-5">
     <div id="iconeResultado"></div>
     <h2 id="tituloResultado" class="fw-bold mb-3"></h2>
     <p id="msgResultado" class="text-muted fs-5 mb-4"></p>
-    <button class="btn btn-theme-outline px-4 py-2" onclick="location.reload()">Fazer Novo Check-in</button>
+    <button class="btn btn-theme-primary px-5 py-2 fs-5" onclick="location.reload()">Fazer Novo Check-in</button>
   </div>
 
   <!-- TELA DA COORDENAÇÃO (CGD) -->
   <div id="telaCGD" class="card-ui oculto" style="max-width: 1200px;">
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-      <h4 class="fw-bold m-0"><i class="fas fa-user-shield text-dark me-2"></i> Painel da Coordenação (CGD)</h4>
+      <h4 class="fw-bold m-0"><i class="fas fa-user-shield text-dark me-2"></i> Área Restrita (CGD)</h4>
       <div>
         <button class="btn btn-sm btn-theme-outline me-2" onclick="buscarOcorrencias()"><i class="fas fa-sync-alt"></i> Atualizar</button>
         <button class="btn btn-sm btn-outline-danger" onclick="voltarMenu()"><i class="fas fa-times"></i> Fechar</button>
@@ -238,10 +220,18 @@
 
   <script>
     // ==========================================
-    // COLE AQUI O SEU LINK DA API GERADO NO APPS SCRIPT
+    // SEU LINK DA API GERADO NO APPS SCRIPT
     // ==========================================
     const API_URL = "https://script.google.com/macros/s/AKfycbwcQ1NknZmyTl07nc3EHJJJoh_Tu6mAFhFYHpFr-kkHTn0jodP2b3y5DuUpyMLdn1XL/exec";
     
+    // BANCO DE SENHAS E USUÁRIOS (Triagem Automática)
+    const usuariosPermitidos = {
+      "1312892099": "Davi de Santana Felício",
+      "34769849": "Theo Araujo de Angelis",
+      "330372950305": "Leandro Messias Silva dos Santos",
+      "300820092795": "Daniel Guilherme Ferreira Neiva"
+    };
+
     let atendenteLogado = "";
     let totalCamposTrackeados = 0;
 
@@ -256,42 +246,78 @@
     ];
 
     window.onload = () => {
-      // Monta o checklist na tela
+      // Monta o checklist Protocolo
       let htmlCheck = "";
       checklistTarefas.forEach((tarefa, i) => {
-        htmlCheck += `<label class="checklist-item"><input type="checkbox" class="form-check-input chk-tarefa tracker" id="chk_${i}"> ${tarefa}</label>`;
+        htmlCheck += `<label class="checklist-item"><input type="checkbox" class="form-check-input tracker"> ${tarefa}</label>`;
       });
       document.getElementById('areaChecklist').innerHTML = htmlCheck;
 
-      // Adiciona o evento de recálculo da barra de progresso em TODOS os campos
+      // Ativa barra de progresso
       document.querySelectorAll('.tracker').forEach(el => {
         el.addEventListener('input', calcularProgresso);
         el.addEventListener('change', calcularProgresso);
       });
     };
 
+    // FUNÇÕES DE ACESSO COM SENHA
+    function tentarAcessoColaborador() {
+      let senha = prompt("Acesso ao Sistema: Digite sua senha numérica.");
+      if (!senha) return;
+      
+      if (usuariosPermitidos[senha]) {
+        atendenteLogado = usuariosPermitidos[senha];
+        document.getElementById("lblAtendenteAtivo").innerText = atendenteLogado;
+        document.getElementById("telaMenuInicial").classList.add("oculto");
+        document.getElementById("telaCheckin").classList.remove("oculto");
+        calcularProgresso();
+      } else {
+        alert("Senha incorreta ou usuário não cadastrado.");
+      }
+    }
+
+    function tentarAcessoRestrito() {
+      let senha = prompt("Área Restrita: Digite a senha da coordenação.");
+      if (!senha) return;
+      
+      // Valida se é especificamente a sua senha para liberar o painel do CGD
+      if (senha === "1312892099") {
+        document.getElementById("telaMenuInicial").classList.add("oculto");
+        document.getElementById("telaCGD").classList.remove("oculto");
+        buscarOcorrencias();
+      } else {
+        alert("Acesso Negado. Credenciais de coordenação inválidas.");
+      }
+    }
+
+    function voltarMenu() {
+      document.getElementById("telaCheckin").classList.add("oculto");
+      document.getElementById("telaCGD").classList.add("oculto");
+      document.getElementById("telaMenuInicial").classList.remove("oculto");
+    }
+
     function calcularProgresso() {
       const trackers = document.querySelectorAll('.tracker');
       if(totalCamposTrackeados === 0) {
-        // Exclui campos de observação ocultos do total
-        trackers.forEach(t => { if(t.type !== 'radio') totalCamposTrackeados++; });
-        // Adiciona 1 pra cada GRUPO de radio buttons
+        // Conta inputs de texto da matrícula
+        trackers.forEach(t => { if(t.type === 'text' && !t.closest('.bloco-ocorrencia')) totalCamposTrackeados++; });
+        // Conta todos os checkboxes
+        trackers.forEach(t => { if(t.type === 'checkbox') totalCamposTrackeados++; });
+        // Adiciona 1 pra cada GRUPO de radio buttons (são 6 perguntas Sim/Não)
         totalCamposTrackeados += 6; 
       }
 
       let preenchidos = 0;
       
-      // Conta Inputs e Selects normais
-      document.querySelectorAll('input[type="text"].tracker, input[type="date"].tracker, input[type="email"].tracker, select.tracker').forEach(inp => {
+      // Textos
+      document.querySelectorAll('input[type="text"].tracker:not(.bloco-ocorrencia input)').forEach(inp => {
         if (inp.value.trim() !== "") preenchidos++;
       });
-
-      // Conta Checkboxes
-      document.querySelectorAll('.chk-tarefa').forEach(chk => {
+      // Checkboxes
+      document.querySelectorAll('input[type="checkbox"].tracker').forEach(chk => {
         if (chk.checked) preenchidos++;
       });
-
-      // Conta Grupos de Radio
+      // Radios
       let nomesRadios = ["radDia", "radHorario", "radPacote", "radPos", "radCuidados", "radGeral"];
       nomesRadios.forEach(nome => {
         if(document.querySelector(`input[name="${nome}"]:checked`)) preenchidos++;
@@ -310,48 +336,9 @@
         bloco.classList.remove('oculto');
       } else {
         bloco.classList.add('oculto');
-        bloco.querySelector('input').value = ""; // Limpa se a pessoa desistir
+        bloco.querySelector('input').value = "";
       }
       calcularProgresso();
-    }
-
-    function login() {
-      const nome = document.getElementById("nomeAtendente").value.trim();
-      const senha = document.getElementById("senhaAcesso").value.trim();
-      
-      if (!nome) return alert("Digite o nome do atendente.");
-      // Senha genérica de acesso para qualquer um da equipe
-      if (senha === "1312892099" || senha === "educ123") {
-        atendenteLogado = nome;
-        document.getElementById("lblAtendenteAtivo").innerText = nome;
-        document.getElementById("telaLogin").classList.add("oculto");
-        document.getElementById("telaMenu").classList.remove("oculto");
-      } else {
-        alert("Senha incorreta.");
-      }
-    }
-
-    function voltarMenu() {
-      document.getElementById("telaCheckin").classList.add("oculto");
-      document.getElementById("telaCGD").classList.add("oculto");
-      document.getElementById("telaMenu").classList.remove("oculto");
-    }
-
-    function abrirCheckin() {
-      document.getElementById("telaMenu").classList.add("oculto");
-      document.getElementById("telaCheckin").classList.remove("oculto");
-      calcularProgresso();
-    }
-
-    function abrirPainelCGD() {
-      let s = prompt("Acesso Restrito CGD: Digite a senha da coordenação.");
-      if (s === "1312892099") {
-        document.getElementById("telaMenu").classList.add("oculto");
-        document.getElementById("telaCGD").classList.remove("oculto");
-        buscarOcorrencias();
-      } else if (s !== null) {
-        alert("Acesso Negado.");
-      }
     }
 
     function obterValorRadio(nome) {
@@ -361,36 +348,34 @@
 
     async function enviarCheckin() {
       const btn = document.getElementById("btnEnviar");
+      const mat = document.getElementById("cMatricula").value.trim();
+      const nom = document.getElementById("cNome").value.trim();
       
-      // VALIDAÇÕES BÁSICAS
-      const nomeAluno = document.getElementById("cNome").value.trim();
-      const cpf = document.getElementById("cCpf").value.trim();
-      if(!nomeAluno || !cpf) {
-        alert("Preencha ao menos o Nome e o CPF do aluno para gerar o registro.");
+      if(!mat || !nom) {
+        alert("Preencha a Matrícula e o Nome do Aluno para registrar.");
         return;
       }
 
       btn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i> Salvando dados...`;
       btn.disabled = true;
 
-      // Monta dados principais
+      // Prepara os dados convertendo checkbox para Conferido/Pendente para a Planilha
       let payloadDados = {
         atendente: atendenteLogado,
-        aluno: nomeAluno,
-        nascimento: document.getElementById("cNasc").value,
-        cpf: cpf,
-        escola: document.getElementById("cEscola").value,
-        periodo: document.getElementById("cPeriodo").value,
-        emailAluno: document.getElementById("cEmailAluno").value,
-        emailResp: document.getElementById("cEmailResp").value,
-        telAluno: document.getElementById("cTelAluno").value,
-        telResp: document.getElementById("cTelResp").value,
-        telEmerg: document.getElementById("cTelEmerg").value,
+        aluno: mat + " - " + nom,
+        nascimento: document.getElementById("chkNasc").checked ? "Conferido" : "Pendente",
+        cpf: document.getElementById("chkCpf").checked ? "Conferido" : "Pendente",
+        escola: document.getElementById("chkEscola").checked ? "Conferido" : "Pendente",
+        periodo: document.getElementById("chkEscola").checked ? "Conferido" : "Pendente",
+        emailAluno: document.getElementById("chkEmailAluno").checked ? "Conferido" : "Pendente",
+        emailResp: document.getElementById("chkEmailResp").checked ? "Conferido" : "Pendente",
+        telAluno: document.getElementById("chkTelAluno").checked ? "Conferido" : "Pendente",
+        telResp: document.getElementById("chkTelResp").checked ? "Conferido" : "Pendente",
+        telEmerg: document.getElementById("chkTelEmerg").checked ? "Conferido" : "Pendente",
         statusChecklist: document.getElementById("txtProgresso").innerText,
         situacaoGeral: "OK"
       };
 
-      // Avalia Ocorrências e preenchimento
       let listaOcorrencias = [];
       let temOcorrenciaCritica = false;
 
@@ -398,7 +383,7 @@
         let val = obterValorRadio(radioName);
         if (val === "OCORRENCIA") {
           temOcorrenciaCritica = true;
-          listaOcorrencias.push({ tipo: tipoNome, descricao: document.getElementById(txtId).value || "Não descrito pelo atendente." });
+          listaOcorrencias.push({ tipo: tipoNome, descricao: document.getElementById(txtId).value || "Sem detalhes adicionais." });
         }
       };
 
@@ -410,13 +395,10 @@
       checarOcorrencia("radGeral", "txtObsGeral", "Ocorrência Geral");
 
       let progressoNum = parseInt(payloadDados.statusChecklist.replace('%',''));
-      let dadosIncompletos = progressoNum < 100;
-
-      if (temOcorrenciaCritica || dadosIncompletos) {
+      if (temOcorrenciaCritica || progressoNum < 100) {
         payloadDados.situacaoGeral = "PRECISA ATUALIZAR";
       }
 
-      // Envia para o Back-end
       try {
         let response = await fetch(API_URL, {
           method: 'POST',
@@ -424,7 +406,6 @@
         });
         
         let res = await response.json();
-        
         if (res.sucesso) {
           mostrarTelaFinal(payloadDados.situacaoGeral);
         } else {
@@ -451,12 +432,12 @@
         icone.innerHTML = `<i class="fas fa-check-circle result-icon result-success"></i>`;
         titulo.innerText = "Parabéns!";
         titulo.className = "fw-bold mb-3 text-success";
-        msg.innerText = "Você concluiu todas as etapas de triagem com sucesso e a matrícula está redondinha.";
+        msg.innerText = "Você concluiu todas as etapas com sucesso.";
       } else {
         icone.innerHTML = `<i class="fas fa-exclamation-triangle result-icon result-warning"></i>`;
-        titulo.innerText = "Atenção (Cadastro Incompleto)";
+        titulo.innerText = "Atenção (Dados Pendentes)";
         titulo.className = "fw-bold mb-3 text-warning";
-        msg.innerText = "Esse aluno precisa atualizar o cadastrão. Existem etapas em branco ou ocorrências que foram enviadas para análise do CGD.";
+        msg.innerText = "Esse aluno precisa atualizar o cadastrão. Existem etapas em branco ou ocorrências relatadas.";
       }
     }
 
@@ -473,23 +454,14 @@
         
         if (res.sucesso && res.dados.length > 0) {
           let html = "";
-          // Inverte para os mais novos aparecerem em cima
           res.dados.reverse().forEach(linha => {
-            let data = linha[0];
-            let aluno = linha[1];
-            let atendente = linha[2];
-            let tipo = linha[3];
-            let desc = linha[4];
-            let status = linha[5];
-            
-            let badge = status === "PENDENTE" ? `<span class="badge bg-danger">PENDENTE</span>` : `<span class="badge bg-success">RESOLVIDO</span>`;
-            
+            let badge = linha[5] === "PENDENTE" ? `<span class="badge bg-danger">PENDENTE</span>` : `<span class="badge bg-success">RESOLVIDO</span>`;
             html += `<tr>
-              <td class="small text-muted">${data}</td>
-              <td class="fw-bold">${aluno}</td>
-              <td class="small">${atendente}</td>
-              <td><span class="badge bg-warning text-dark">${tipo}</span></td>
-              <td class="text-start small">${desc}</td>
+              <td class="small text-muted">${linha[0]}</td>
+              <td class="fw-bold">${linha[1]}</td>
+              <td class="small">${linha[2]}</td>
+              <td><span class="badge bg-warning text-dark">${linha[3]}</span></td>
+              <td class="text-start small">${linha[4]}</td>
               <td>${badge}</td>
             </tr>`;
           });
