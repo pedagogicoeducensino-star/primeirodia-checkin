@@ -480,7 +480,7 @@
       if(faltamVal.length > 0) erros.push("OCORRÊNCIAS NA VALIDAÇÃO:\n- " + faltamVal.join("\n- "));
 
       if(erros.length > 0) {
-        relatorioFinalCompilado = `OCORRÊNCIA GERAL DE TRIAGEM\nMatrícula: ${mat}\nData/Hora: ${new Date().toLocaleString('pt-BR')}\nAtendente: ${atendenteLogado}\n\n${erros.join("\n\n")}\n\nSolicita-se a conferência no CGD.`;
+        relatorioFinalCompilado = `OCORRÊNCIA GERAL DE TRIAGEM\nMatrícula: ${mat}\nData/Hora: ${new Date().toLocaleString('pt-BR')}\nAtendente: ${atendenteLogado}\n\n${erros.join("\n\n")}\n\nSolicita-se a conferência.`;
         document.getElementById('tituloRelatorio').innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Atenção: Divergências Registradas</span>';
         document.getElementById('boxRelatorioGeral').classList.remove('oculto');
         document.getElementById('textoRelatorioInteligente').innerText = relatorioFinalCompilado;
