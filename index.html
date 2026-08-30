@@ -62,6 +62,10 @@
       <div id="iconeAlerta"><i class="fas fa-exclamation-circle text-warning"></i></div>
       <h4 id="tituloAlerta">Atenção</h4>
       <p id="textoAlerta">Mensagem de erro aqui.</p>
+      
+      <!-- CAMPO DE SENHA OCULTO PARA OS NOVOS PROMPTS -->
+      <input type="password" id="inputAlertaPrompt" class="form-control text-center mb-4 fs-5 oculto" placeholder="Digite a senha de autorização">
+      
       <div id="botoesAlerta" class="d-flex justify-content-center gap-2">
         <button id="btnAlertaOk" class="btn btn-theme-primary px-4 py-2 w-100" onclick="fecharAlerta()">Entendi</button>
       </div>
@@ -331,8 +335,12 @@
       else boxAviso.classList.add('oculto');
     }
 
+    // --- FUNÇÕES DE ALERTA ATUALIZADAS (MODAL SYSTEM 2.0) ---
+
+    // 1. Alertas Simples
     function mostrarAlertaPersonalizado(titulo, mensagem, tipoIcone, textoBotao = "Entendi", acaoSecundaria = null) {
       document.getElementById('modalAlerta').classList.remove('oculto');
+      document.getElementById('inputAlertaPrompt').classList.add('oculto'); // Oculta o input
       document.getElementById('tituloAlerta').innerText = titulo;
       document.getElementById('textoAlerta').innerHTML = mensagem;
       
@@ -353,8 +361,62 @@
       }
     }
     
+    // 2. Confirmação (Substitui o window.confirm)
+    function confirmarAcaoModal(titulo, mensagem) {
+      return new Promise((resolve) => {
+        document.getElementById('modalAlerta').classList.remove('oculto');
+        document.getElementById('inputAlertaPrompt').classList.add('oculto');
+        document.getElementById('tituloAlerta').innerHTML = titulo;
+        document.getElementById('textoAlerta').innerHTML = mensagem;
+        document.getElementById('iconeAlerta').innerHTML = '<i class="fas fa-question-circle text-danger"></i>';
+        
+        let botoesDiv = document.getElementById('botoesAlerta');
+        botoesDiv.innerHTML = `
+          <button class="btn btn-secondary px-4 py-2 w-100 fw-bold" onclick="fecharAlertaCallback(false)">Cancelar</button>
+          <button class="btn btn-danger px-4 py-2 w-100 fw-bold" onclick="fecharAlertaCallback(true)">Confirmar Exclusão</button>
+        `;
+        
+        window.fecharAlertaCallback = (resultado) => {
+          fecharAlerta();
+          resolve(resultado);
+        };
+      });
+    }
+
+    // 3. Prompt (Substitui o window.prompt)
+    function promptAcaoModal(titulo, mensagem) {
+      return new Promise((resolve) => {
+        document.getElementById('modalAlerta').classList.remove('oculto');
+        document.getElementById('tituloAlerta').innerHTML = titulo;
+        document.getElementById('textoAlerta').innerHTML = mensagem;
+        document.getElementById('iconeAlerta').innerHTML = '<i class="fas fa-lock text-dark"></i>';
+        
+        let inputPrompt = document.getElementById('inputAlertaPrompt');
+        inputPrompt.classList.remove('oculto');
+        inputPrompt.value = ''; // Limpa antes de exibir
+        
+        let botoesDiv = document.getElementById('botoesAlerta');
+        botoesDiv.innerHTML = `
+          <button class="btn btn-secondary px-4 py-2 w-100 fw-bold" onclick="fecharAlertaCallback(null)">Cancelar</button>
+          <button class="btn btn-theme-primary px-4 py-2 w-100 fw-bold" onclick="fecharAlertaCallback(document.getElementById('inputAlertaPrompt').value)">Autorizar</button>
+        `;
+        
+        window.fecharAlertaCallback = (resultado) => {
+          fecharAlerta();
+          resolve(resultado);
+        };
+
+        // Foca no input pra facilitar a vida do usuário
+        setTimeout(() => inputPrompt.focus(), 100);
+        inputPrompt.onkeypress = (e) => {
+          if (e.key === 'Enter') fecharAlertaCallback(inputPrompt.value);
+        };
+      });
+    }
+
     function fecharAlerta() { document.getElementById('modalAlerta').classList.add('oculto'); }
 
+    // --- LOGIN COM SESSION STORAGE ---
     function processarLogin(tipoBtn) {
       let senha = document.getElementById('inputSenha').value.trim();
       if(!senha) return mostrarAlertaPersonalizado("Erro de Acesso", "Por favor, digite a senha.", "erro");
@@ -480,7 +542,7 @@
       if(faltamVal.length > 0) erros.push("OCORRÊNCIAS NA VALIDAÇÃO:\n- " + faltamVal.join("\n- "));
 
       if(erros.length > 0) {
-        relatorioFinalCompilado = `OCORRÊNCIA GERAL DE TRIAGEM\nMatrícula: ${mat}\nData/Hora: ${new Date().toLocaleString('pt-BR')}\nAtendente: ${atendenteLogado}\n\n${erros.join("\n\n")}\n\nSolicita-se a conferência.`;
+        relatorioFinalCompilado = `OCORRÊNCIA GERAL DE TRIAGEM\nMatrícula: ${mat}\nData/Hora: ${new Date().toLocaleString('pt-BR')}\nAtendente: ${atendenteLogado}\n\n${erros.join("\n\n")}\n\nSolicita-se a conferência no CGD.`;
         document.getElementById('tituloRelatorio').innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Atenção: Divergências Registradas</span>';
         document.getElementById('boxRelatorioGeral').classList.remove('oculto');
         document.getElementById('textoRelatorioInteligente').innerText = relatorioFinalCompilado;
@@ -573,22 +635,35 @@
       } catch (err) { tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-danger fw-bold">Erro de conexão ao buscar histórico.</td></tr>`; }
     }
 
-    function verificarAutorizacao(dono) {
+    // --- NOVA FUNÇÃO ASSÍNCRONA DE AUTORIZAÇÃO ---
+    async function verificarAutorizacaoAsync(dono) {
       if(isCGD || dono === atendenteLogado) return true;
-      let s = prompt(`SEGURANÇA: Esta triagem pertence a ${dono}.\nDigite a senha numérica DELE(A) ou da Coordenação para autorizar a alteração:`);
-      return (usuariosPermitidos[s] === dono || adminsPermitidos[s]);
+      
+      let s = await promptAcaoModal(`Segurança de Edição`, `Esta triagem pertence a <b>${dono}</b>.<br>Digite a senha numérica DELE(A) ou da Coordenação para autorizar:`);
+      if(s === null) return false; // Clicou em cancelar
+      
+      let autorizado = (usuariosPermitidos[s] === dono || adminsPermitidos[s]);
+      
+      if(!autorizado) {
+        mostrarAlertaPersonalizado("Acesso Negado", "Senha incorreta. Você não tem permissão para alterar este registro.", "erro");
+      }
+      return autorizado;
     }
 
     async function excluir(idR, dono) {
-      if(!verificarAutorizacao(dono)) return mostrarAlertaPersonalizado("Bloqueado", "Senha incorreta. Acesso negado para excluir.", "erro");
+      let autorizado = await verificarAutorizacaoAsync(dono);
+      if(!autorizado) return;
       
       if (isCGD) {
         // EXCLUSÃO REAL E DEFINITIVA PARA COORDENADOR
-        if(!confirm("Atenção (Gestão): Tem certeza que deseja apagar essa triagem DEFINITIVAMENTE do banco de dados?")) return;
+        let confirmado = await confirmarAcaoModal("Exclusão Definitiva", "Atenção (Gestão): Tem certeza que deseja apagar essa triagem <b>DEFINITIVAMENTE</b> do banco de dados?");
+        if(!confirmado) return;
+        
         try { await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "excluir_ocorrencia", linha: idR }) }); buscarHistorico(); } catch(e){}
       } else {
         // SOFT DELETE PARA COLABORADORES
-        if(!confirm("Tem certeza que deseja excluir esta triagem?")) return;
+        let confirmado = await confirmarAcaoModal("Excluir Triagem", "Tem certeza que deseja excluir esta triagem do histórico?");
+        if(!confirmado) return;
         
         let textoAtual = document.getElementById('txtOrig_'+idR).innerText;
         // Previne duplicação do carimbo
@@ -604,7 +679,7 @@
     
     async function salvarDevolutiva() {
       let t = document.getElementById('txtDevolutiva').value.trim(); let l = document.getElementById('linhaAlvoDevolutiva').value;
-      if(!t) return alert("Digite a solução para resolver.");
+      if(!t) { mostrarAlertaPersonalizado("Campo Vazio", "Digite a solução para resolver a ocorrência.", "aviso"); return; }
       
       let carimbo = `[Resolvido por ${atendenteLogado} em ${new Date().toLocaleString('pt-BR')}]\n${t}`;
       
@@ -613,8 +688,10 @@
     
     async function mudarStatus(l, st) { try { await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "atualizar_status", linha: l, status: st, devolutiva: "" }) }); buscarHistorico(); } catch(e){} }
 
-    function abrirEditar(idR, dono) {
-      if(!verificarAutorizacao(dono)) return mostrarAlertaPersonalizado("Bloqueado", "Você não pode editar a ocorrência de outro colega sem a senha dele.", "erro");
+    async function abrirEditar(idR, dono) {
+      let autorizado = await verificarAutorizacaoAsync(dono);
+      if(!autorizado) return;
+      
       document.getElementById('linhaAlvoEdicao').value = idR;
       document.getElementById('txtEdicao').value = document.getElementById('txtOrig_'+idR).innerText;
       document.getElementById('modalEdicao').style.display = 'block';
