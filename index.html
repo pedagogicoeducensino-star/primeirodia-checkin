@@ -295,7 +295,6 @@
     ];
 
     window.onload = () => {
-      // Montar Grid de Perguntas (Col-md-6 economiza espaço)
       let htmlDados = "";
       perguntasDados.forEach(p => {
         htmlDados += `<div class="col-md-6">
@@ -311,7 +310,6 @@
       });
       document.getElementById('areaPerguntasDados').innerHTML = htmlDados;
 
-      // Montar Grid Protocolos (Col-md-6)
       let htmlCheck = "";
       checklistTarefas.forEach(t => { 
         htmlCheck += `<div class="col-md-6"><label class="checklist-item"><input type="checkbox" id="${t.id}" class="form-check-input tracker"> ${t.label}</label></div>`; 
@@ -320,7 +318,6 @@
       
       document.querySelectorAll('.tracker').forEach(el => { el.addEventListener('change', calcularProgresso); });
 
-      // Verificação de Sessão (O Deslogamento no F5 foi resolvido aqui!)
       if(sessionStorage.getItem('logadoEduc') === 'true') {
         atendenteLogado = sessionStorage.getItem('nomeEduc');
         isCGD = (sessionStorage.getItem('isCGDEduc') === 'true');
@@ -334,7 +331,6 @@
       else boxAviso.classList.add('oculto');
     }
 
-    // --- ALERTAS BONITOS 100% FUNCIONAIS ---
     function mostrarAlertaPersonalizado(titulo, mensagem, tipoIcone, textoBotao = "Entendi", acaoSecundaria = null) {
       document.getElementById('modalAlerta').classList.remove('oculto');
       document.getElementById('tituloAlerta').innerText = titulo;
@@ -347,7 +343,6 @@
       
       let botoesDiv = document.getElementById('botoesAlerta');
       
-      // Limpa os botões e cria a estrutura certa dependendo da situação
       if(acaoSecundaria) {
         botoesDiv.innerHTML = `
           <button class="btn btn-secondary px-4 py-2 w-100 fw-bold" onclick="fecharAlerta()">Corrigir Pendência</button>
@@ -357,9 +352,9 @@
         botoesDiv.innerHTML = `<button class="btn btn-theme-primary px-4 py-2 w-100 fs-5" onclick="fecharAlerta()">${textoBotao}</button>`;
       }
     }
+    
     function fecharAlerta() { document.getElementById('modalAlerta').classList.add('oculto'); }
 
-    // --- LOGIN COM SESSION STORAGE ---
     function processarLogin(tipoBtn) {
       let senha = document.getElementById('inputSenha').value.trim();
       if(!senha) return mostrarAlertaPersonalizado("Erro de Acesso", "Por favor, digite a senha.", "erro");
@@ -400,7 +395,6 @@
 
     function sair() { sessionStorage.clear(); location.reload(); }
 
-    // --- LÓGICA DO WIZARD ---
     function calcularProgresso() {
       let totalItems = 9 + 7 + 5; 
       let preenchidos = 0;
@@ -433,7 +427,6 @@
 
         if(temVazio || temNao) {
           let msg = "Atenção! Ficaram itens pendentes ou marcados como 'Não' na <b>Conferência de Dados</b>.<br><br>Deseja realmente avançar a triagem sem concluir a conferência?";
-          // Se ele clicar em avançar assim mesmo, a função fechara o alerta e mudara a tela.
           return mostrarAlertaPersonalizado("Divergência Encontrada", msg, "aviso", "", `fecharAlerta(); avancarSemAlerta(${prox});`);
         }
       }
@@ -451,7 +444,6 @@
         let travado = false;
         document.querySelectorAll('.bloco-ocorrencia:not(.oculto) input').forEach(inp => { if(!inp.value.trim()) travado = true; });
         
-        // Bloqueio Forçado: Se tem divergência na Validação, DEVE descrever. O botão "Avançar mesmo assim" não existe aqui.
         if(travado) return mostrarAlertaPersonalizado("Campo Obrigatório", "Você marcou uma divergência (Não/Sim). É <b>obrigatório</b> descrever o problema na caixa de texto correspondente para podermos gerar o relatório.", "erro");
         
         analisarSistema();
@@ -487,7 +479,6 @@
       });
       if(faltamVal.length > 0) erros.push("OCORRÊNCIAS NA VALIDAÇÃO:\n- " + faltamVal.join("\n- "));
 
-      // AQUI ESTÁ A MÁGICA DO TEXTO DE 100% CORRETO
       if(erros.length > 0) {
         relatorioFinalCompilado = `OCORRÊNCIA GERAL DE TRIAGEM\nMatrícula: ${mat}\nData/Hora: ${new Date().toLocaleString('pt-BR')}\nAtendente: ${atendenteLogado}\n\n${erros.join("\n\n")}\n\nSolicita-se a conferência no CGD.`;
         document.getElementById('tituloRelatorio').innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Atenção: Divergências Registradas</span>';
@@ -503,7 +494,6 @@
       avancarSemAlerta(4);
     }
 
-    // --- CONEXÃO COM SERVIDOR (Tratamento de erro final) ---
     async function enviarProServidor() {
       let btn = document.getElementById('btnEnviarFinal'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...'; btn.disabled = true;
       let payload = { atendente: atendenteLogado, aluno: document.getElementById('cMatricula').value, statusChecklist: pctFinal + "%", situacaoGeral: (relatorioFinalCompilado !== "") ? "COM OCORRÊNCIA" : "OK" };
@@ -513,7 +503,6 @@
         
         mostrarAlertaPersonalizado("Triagem Registrada!", "Dados enviados com sucesso para Coordenação.", "sucesso", "OK, Nova Triagem");
         
-        // Limpar tela para próxima triagem
         document.querySelectorAll('input[type="text"]').forEach(i => i.value="");
         document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked=false);
         document.querySelectorAll('input[type="radio"]').forEach(i => i.checked=false);
@@ -523,7 +512,7 @@
       } catch(e) { 
         mostrarAlertaPersonalizado("Erro de Conexão", "Não foi possível enviar os dados ao servidor. Tente novamente.", "erro"); 
       }
-      btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Enviar ao CGD e Finalizar'; btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Enviar e Finalizar'; btn.disabled = false;
     }
 
     function formatarData(dStr) {
@@ -540,11 +529,21 @@
           res.dados.reverse().forEach(linha => {
             let idR = linha[6]; let txtOriginal = linha[3]; let atendOriginal = linha[2];
             
-            // Bloqueia botões de PENDENTE se a triagem foi 100% perfeita
+            // VERIFICAÇÃO DO SOFT DELETE
+            let isExcluidoSoft = txtOriginal.includes("[EXCLUIDO_SOFT]");
+            
+            // Se foi "excluído" por um colaborador, não mostra para outros colaboradores
+            if (isExcluidoSoft && !isCGD) return;
+
             let isPerfeita = txtOriginal.includes("TRIAGEM CONCLUÍDA COM SUCESSO");
             
             let badge = "";
-            if (isPerfeita) badge = `<span class="badge bg-success p-2 fs-6">100% OK</span>`;
+            if (isExcluidoSoft) {
+              badge = `<span class="badge bg-dark p-2 fs-6">EXCLUÍDO</span>`;
+              // Limpa a tag invisível para a tela ficar bonita
+              txtOriginal = txtOriginal.replace("[EXCLUIDO_SOFT]\n", "");
+            }
+            else if (isPerfeita) badge = `<span class="badge bg-success p-2 fs-6">100% OK</span>`;
             else if (linha[4] === "PENDENTE") badge = `<span class="badge bg-danger p-2 fs-6">PENDENTE</span>`;
             else badge = `<span class="badge bg-success p-2">RESOLVIDO</span>`;
             
@@ -552,12 +551,12 @@
             
             let acoes = "";
             if(isCGD) {
-              if(!isPerfeita) {
+              if(!isPerfeita && !isExcluidoSoft) {
                 if(linha[4] === "PENDENTE") acoes += `<button class="btn btn-theme-primary btn-acao w-100 mb-1" onclick="abrirResolver(${idR})">Resolver</button>`;
                 else acoes += `<button class="btn btn-secondary btn-acao w-100 mb-1" onclick="mudarStatus(${idR}, 'PENDENTE')">Tornar Pendente</button>`;
               }
               acoes += `<button class="btn btn-secondary btn-acao w-100 mb-1" onclick="abrirEditar(${idR}, '${atendOriginal}')"><i class="fas fa-edit"></i> Editar Ocorrência</button>`;
-              acoes += `<button class="btn btn-danger btn-acao w-100" onclick="excluir(${idR}, '${atendOriginal}')"><i class="fas fa-trash"></i> Excluir</button>`;
+              acoes += `<button class="btn btn-danger btn-acao w-100" onclick="excluir(${idR}, '${atendOriginal}')"><i class="fas fa-trash"></i> Excluir Definitivo</button>`;
             } else {
               acoes += `<button class="btn btn-secondary btn-acao w-100 mb-1" onclick="abrirEditar(${idR}, '${atendOriginal}')"><i class="fas fa-edit"></i> Editar Ocorrência</button>`;
               acoes += `<button class="btn btn-outline-danger btn-acao w-100" onclick="excluir(${idR}, '${atendOriginal}')"><i class="fas fa-trash"></i> Excluir</button>`;
@@ -574,7 +573,6 @@
       } catch (err) { tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-danger fw-bold">Erro de conexão ao buscar histórico.</td></tr>`; }
     }
 
-    // --- AÇÕES COM CONTROLE DE EDIÇÃO ---
     function verificarAutorizacao(dono) {
       if(isCGD || dono === atendenteLogado) return true;
       let s = prompt(`SEGURANÇA: Esta triagem pertence a ${dono}.\nDigite a senha numérica DELE(A) ou da Coordenação para autorizar a alteração:`);
@@ -583,8 +581,23 @@
 
     async function excluir(idR, dono) {
       if(!verificarAutorizacao(dono)) return mostrarAlertaPersonalizado("Bloqueado", "Senha incorreta. Acesso negado para excluir.", "erro");
-      if(!confirm("Atenção: Tem certeza que deseja apagar essa triagem do banco de dados?")) return;
-      try { await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "excluir_ocorrencia", linha: idR }) }); buscarHistorico(); } catch(e){}
+      
+      if (isCGD) {
+        // EXCLUSÃO REAL E DEFINITIVA PARA COORDENADOR
+        if(!confirm("Atenção (Gestão): Tem certeza que deseja apagar essa triagem DEFINITIVAMENTE do banco de dados?")) return;
+        try { await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "excluir_ocorrencia", linha: idR }) }); buscarHistorico(); } catch(e){}
+      } else {
+        // SOFT DELETE PARA COLABORADORES
+        if(!confirm("Tem certeza que deseja excluir esta triagem?")) return;
+        
+        let textoAtual = document.getElementById('txtOrig_'+idR).innerText;
+        // Previne duplicação do carimbo
+        if (textoAtual.includes("Registro excluído pelo colaborador")) return; 
+        
+        let carimboExclusao = `[EXCLUIDO_SOFT]\n⚠️ Registro excluído pelo colaborador ${atendenteLogado} em ${new Date().toLocaleString('pt-BR')}\n\n${textoAtual}`;
+        
+        try { await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "editar_texto", linha: idR, texto: carimboExclusao }) }); buscarHistorico(); } catch(e){}
+      }
     }
 
     function abrirResolver(idR) { document.getElementById('linhaAlvoDevolutiva').value = idR; document.getElementById('txtDevolutiva').value = ""; document.getElementById('modalDevolutiva').style.display = 'block'; }
@@ -593,7 +606,6 @@
       let t = document.getElementById('txtDevolutiva').value.trim(); let l = document.getElementById('linhaAlvoDevolutiva').value;
       if(!t) return alert("Digite a solução para resolver.");
       
-      // Carimbo Inteligente
       let carimbo = `[Resolvido por ${atendenteLogado} em ${new Date().toLocaleString('pt-BR')}]\n${t}`;
       
       try { await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "atualizar_status", linha: l, status: "RESOLVIDO", devolutiva: carimbo }) }); fecharModais(); buscarHistorico(); } catch(e){}
@@ -611,7 +623,6 @@
     async function salvarEdicao() {
       let t = document.getElementById('txtEdicao').value.trim(); let l = document.getElementById('linhaAlvoEdicao').value;
       
-      // Carimbo de Edição
       let carimbo = `[Editado por ${atendenteLogado} em ${new Date().toLocaleString('pt-BR')}]\n\n${t}`;
       
       try { await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "editar_texto", linha: l, texto: carimbo }) }); fecharModais(); buscarHistorico(); } catch(e){}
