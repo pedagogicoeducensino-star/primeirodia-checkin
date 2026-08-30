@@ -465,7 +465,7 @@
       document.getElementById('passo' + prox).classList.remove('oculto');
     }
 
-function analisarSistema() {
+    function analisarSistema() {
       let mat = document.getElementById('cMatricula').value; relatorioFinalCompilado = ""; let erros = [];
       
       let faltamDados = [];
@@ -517,7 +517,6 @@ function analisarSistema() {
         document.querySelectorAll('input[type="text"]').forEach(i => i.value="");
         document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked=false);
         document.querySelectorAll('input[type="radio"]').forEach(i => i.checked=false);
-        document.querySelectorAll('input[type="radio"][value="OK"]').forEach(i => i.checked=true); // reseta validacao pra Sim
         document.querySelectorAll('.bloco-ocorrencia').forEach(b => b.classList.add('oculto'));
         document.querySelectorAll('.aviso-cgd').forEach(a => a.classList.add('oculto'));
         calcularProgresso(); avancarSemAlerta(1); buscarHistorico();
@@ -531,7 +530,7 @@ function analisarSistema() {
       if(!dStr) return ""; if(dStr.includes("T")) { let d = new Date(dStr); return d.toLocaleDateString('pt-BR') + " " + d.toLocaleTimeString('pt-BR'); } return dStr;
     }
 
-async function buscarHistorico() {
+    async function buscarHistorico() {
       const tbody = document.getElementById("corpoTabela"); tbody.innerHTML = `<tr><td colspan="5" class="py-5 text-center"><i class="fas fa-spinner fa-spin fs-2 text-warning mb-2"></i><br>Atualizando tabela...</td></tr>`;
       try {
         let response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "buscar_ocorrencias" }) });
