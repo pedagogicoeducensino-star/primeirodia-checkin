@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Triagem e Check-in | Educ</title>
+  <title>Triagem e Check-in</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;600;700&display=swap" rel="stylesheet">
@@ -88,13 +88,13 @@
     <div class="card-ui mb-3" style="padding: 15px;">
       <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
         <div>
-          <h4 class="fw-bold m-0" style="color:var(--escola-cinza-escuro);"><i class="fas fa-edit text-theme me-2" style="color:var(--escola-laranja);"></i> Nova Triagem</h4>
+          <h4 class="fw-bold m-0" style="color:var(--escola-cinza-escuro);"><i class="fas fa-edit text-theme me-2" style="color:var(--escola-laranja);"></i> Sistema de Check In e Triagem</h4>
           <span class="text-muted">Colaborador: <strong id="lblNomeColab"></strong></span>
         </div>
         <button class="btn btn-sm btn-outline-danger" onclick="sair()"><i class="fas fa-sign-out-alt me-1"></i> Deslogar</button>
       </div>
       <div class="progress-container p-2 mb-0 border-0 shadow-none">
-        <div class="d-flex justify-content-between mb-1"><small class="fw-bold fs-6">Progresso da Triagem</small><small class="fw-bold fs-6" id="txtProgresso" style="color:var(--escola-laranja);">0%</small></div>
+        <div class="d-flex justify-content-between mb-1"><small class="fw-bold fs-6">Progresso</small><small class="fw-bold fs-6" id="txtProgresso" style="color:var(--escola-laranja);">0%</small></div>
         <div class="progress"><div id="barraProgresso" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%;"></div></div>
       </div>
     </div>
@@ -103,7 +103,7 @@
     <div class="card-ui">
       <!-- PASSO 1 -->
       <div id="passo1" class="passo-form">
-        <h5 class="section-title">1. Conferência de Dados (CGD)</h5>
+        <h5 class="section-title">1. Conferência de Dados Pessoais</h5>
         <div class="mb-4 w-50">
           <label class="fw-bold fs-6 mb-2">Matrícula do Aluno(a) *</label>
           <input type="text" id="cMatricula" class="form-control form-control-lg bg-light" placeholder="Ex: 1234">
@@ -129,13 +129,13 @@
         
         <div class="d-flex justify-content-between border-top pt-4">
           <button class="btn btn-secondary px-4 py-2 fs-6" onclick="avancarSemAlerta(1)"><i class="fas fa-chevron-left me-2"></i> Voltar</button>
-          <button class="btn btn-theme-primary px-5 py-2 fs-5" onclick="tentarAvancar(2, 3)">Avançar Etapa <i class="fas fa-chevron-right ms-2"></i></button>
+          <button class="btn btn-theme-primary px-5 py-2 fs-5" onclick="tentarAvancar(2, 3)">Avançar <i class="fas fa-chevron-right ms-2"></i></button>
         </div>
       </div>
 
       <!-- PASSO 3 -->
       <div id="passo3" class="passo-form oculto">
-        <h5 class="section-title">3. Validação de Matrícula</h5>
+        <h5 class="section-title">3. Validação de Informações</h5>
         <p class="text-muted mb-3"><i class="fas fa-info-circle text-primary"></i> Responda as validações abaixo. Se houver divergência, o sistema exigirá que você relate o erro.</p>
         
         <div class="row g-3 mb-4">
@@ -212,7 +212,7 @@
   <!-- TABELÃO DE HISTÓRICO (LARGURA MAXIMA, MESMA DO CARD-UI) -->
   <div id="tabelaHistorico" class="card-ui oculto">
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-      <h5 class="fw-bold m-0"><i class="fas fa-history me-2"></i> Histórico Global de Triagens</h5>
+      <h5 class="fw-bold m-0"><i class="fas fa-history me-2"></i> Histórico das Triagens</h5>
       <button class="btn btn-outline-secondary" onclick="buscarHistorico()"><i class="fas fa-sync-alt me-2"></i> Atualizar Tabela</button>
     </div>
     <div class="table-responsive">
@@ -465,7 +465,7 @@
       document.getElementById('passo' + prox).classList.remove('oculto');
     }
 
-    function analisarSistema() {
+function analisarSistema() {
       let mat = document.getElementById('cMatricula').value; relatorioFinalCompilado = ""; let erros = [];
       
       let faltamDados = [];
@@ -487,6 +487,7 @@
       });
       if(faltamVal.length > 0) erros.push("OCORRÊNCIAS NA VALIDAÇÃO:\n- " + faltamVal.join("\n- "));
 
+      // AQUI ESTÁ A MÁGICA DO TEXTO DE 100% CORRETO
       if(erros.length > 0) {
         relatorioFinalCompilado = `OCORRÊNCIA GERAL DE TRIAGEM\nMatrícula: ${mat}\nData/Hora: ${new Date().toLocaleString('pt-BR')}\nAtendente: ${atendenteLogado}\n\n${erros.join("\n\n")}\n\nSolicita-se a conferência no CGD.`;
         document.getElementById('tituloRelatorio').innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Atenção: Divergências Registradas</span>';
@@ -494,6 +495,7 @@
         document.getElementById('textoRelatorioInteligente').innerText = relatorioFinalCompilado;
         pctFinal = parseInt(document.getElementById('txtProgresso').innerText);
       } else {
+        relatorioFinalCompilado = `TRIAGEM CONCLUÍDA COM SUCESSO\nMatrícula: ${mat}\nData/Hora: ${new Date().toLocaleString('pt-BR')}\nAtendente: ${atendenteLogado}\n\nMediante a triagem, todos os dados foram conferidos e não houve necessidade de intervenção e/ou correção.`;
         document.getElementById('tituloRelatorio').innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> Triagem 100% Correta e Concluída</span>';
         document.getElementById('boxRelatorioGeral').classList.add('oculto');
         pctFinal = 100;
@@ -529,7 +531,7 @@
       if(!dStr) return ""; if(dStr.includes("T")) { let d = new Date(dStr); return d.toLocaleDateString('pt-BR') + " " + d.toLocaleTimeString('pt-BR'); } return dStr;
     }
 
-    async function buscarHistorico() {
+async function buscarHistorico() {
       const tbody = document.getElementById("corpoTabela"); tbody.innerHTML = `<tr><td colspan="5" class="py-5 text-center"><i class="fas fa-spinner fa-spin fs-2 text-warning mb-2"></i><br>Atualizando tabela...</td></tr>`;
       try {
         let response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "buscar_ocorrencias" }) });
@@ -538,13 +540,23 @@
           let html = "";
           res.dados.reverse().forEach(linha => {
             let idR = linha[6]; let txtOriginal = linha[3]; let atendOriginal = linha[2];
-            let badge = linha[4] === "PENDENTE" ? `<span class="badge bg-danger p-2 fs-6">PENDENTE</span>` : `<span class="badge bg-success p-2">RESOLVIDO</span>`;
+            
+            // Bloqueia botões de PENDENTE se a triagem foi 100% perfeita
+            let isPerfeita = txtOriginal.includes("TRIAGEM CONCLUÍDA COM SUCESSO");
+            
+            let badge = "";
+            if (isPerfeita) badge = `<span class="badge bg-success p-2 fs-6">100% OK</span>`;
+            else if (linha[4] === "PENDENTE") badge = `<span class="badge bg-danger p-2 fs-6">PENDENTE</span>`;
+            else badge = `<span class="badge bg-success p-2">RESOLVIDO</span>`;
+            
             let dev = linha[5] ? `<div class="bg-success text-white p-2 rounded mt-2" style="font-size:12px; white-space: pre-wrap;"><i class="fas fa-check-circle"></i> ${linha[5]}</div>` : '';
             
             let acoes = "";
             if(isCGD) {
-              if(linha[4] === "PENDENTE") acoes += `<button class="btn btn-theme-primary btn-acao w-100 mb-1" onclick="abrirResolver(${idR})">Resolver</button>`;
-              else acoes += `<button class="btn btn-secondary btn-acao w-100 mb-1" onclick="mudarStatus(${idR}, 'PENDENTE')">Tornar Pendente</button>`;
+              if(!isPerfeita) {
+                if(linha[4] === "PENDENTE") acoes += `<button class="btn btn-theme-primary btn-acao w-100 mb-1" onclick="abrirResolver(${idR})">Resolver</button>`;
+                else acoes += `<button class="btn btn-secondary btn-acao w-100 mb-1" onclick="mudarStatus(${idR}, 'PENDENTE')">Tornar Pendente</button>`;
+              }
               acoes += `<button class="btn btn-secondary btn-acao w-100 mb-1" onclick="abrirEditar(${idR}, '${atendOriginal}')"><i class="fas fa-edit"></i> Editar Ocorrência</button>`;
               acoes += `<button class="btn btn-danger btn-acao w-100" onclick="excluir(${idR}, '${atendOriginal}')"><i class="fas fa-trash"></i> Excluir</button>`;
             } else {
@@ -554,7 +566,7 @@
 
             html += `<tr><td class="text-muted fw-bold">${formatarData(linha[0])}</td>
               <td><span class="fw-bold d-block text-dark" style="font-size: 15px;">Mat. ${linha[1]}</span><span class="small text-muted"><i class="fas fa-user-edit"></i> ${atendOriginal}</span></td>
-              <td><div class="report-box p-3" id="txtOrig_${idR}">${txtOriginal || 'Nenhuma divergência registrada (100% Ok).'}</div></td>
+              <td><div class="report-box p-3" id="txtOrig_${idR}">${txtOriginal}</div></td>
               <td class="text-center">${badge}${dev}</td>
               <td class="text-center" style="vertical-align: top;">${acoes}</td></tr>`;
           });
