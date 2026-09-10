@@ -136,8 +136,8 @@
           </div>
           <div class="col-md-6">
             <label class="fw-bold mb-1"><i class="fab fa-whatsapp text-success"></i> WhatsApp do Aluno</label>
-            <input type="text" id="cWhats" class="form-control" placeholder="(DD) 99999-9999">
-            <small class="text-muted">Deixe em branco se não tiver ou estiver pendente.</small>
+            <input type="text" id="cWhats" class="form-control" placeholder="Ex: 799999999, 798888888">
+            <small class="text-muted">Separe por vírgula se houver mais de um número.</small>
           </div>
           <div class="col-md-6">
             <label class="fw-bold mb-1"><i class="fas fa-envelope text-primary"></i> E-mail do Aluno</label>
@@ -241,12 +241,13 @@
     </div>
     <div class="table-responsive">
       <table class="table table-ui table-hover text-start">
-        <thead><tr><th width="12%">Data</th><th width="15%">Aluno/Colab.</th><th width="35%">Relatório da Ocorrência</th><th width="15%">Status</th><th width="23%">Ações</th></tr></thead>
+        <thead><tr><th width="12%">Data</th><th width="20%">Aluno/Colab.</th><th width="20%">Status</th><th width="25%">Relatório</th><th width="23%">Ações</th></tr></thead>
         <tbody id="corpoTabela"><tr><td colspan="5" class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin fs-4"></i><br>Carregando histórico...</td></tr></tbody>
       </table>
     </div>
   </div>
 
+  <!-- MODAIS DE EDIÇÃO E RESOLUÇÃO -->
   <div class="modal" tabindex="-1" id="modalDevolutiva" style="background: rgba(0,0,0,0.5);">
     <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
       <div class="modal-header bg-dark text-white"><h5 class="modal-title m-0">Resolver Ocorrência</h5></div>
@@ -278,11 +279,9 @@
 
   <script>
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbwcQ1NknZmyTl07nc3EHJJJoh_Tu6mAFhFYHpFr-kkHTn0jodP2b3y5DuUpyMLdn1XL/exec";
-    
+    const API_URL = "https://script.google.com/macros/s/AKfycbwcQ1NknZmyTl07nc3EHJJJoh_Tu6mAFhFYHpFr-kkHTn0jodP2b3y5DuUpyMLdn1XL/exec"; 
     // ==========================================
-    // DICIONÁRIO DE LINKS (CADASTRE NOVOS SE PRECISAR)
-    // ==========================================
+
     const LINKS_PDPC = {
       "Assistente Administrativo Plus": "https://drive.google.com/file/d/1SL5Ho6FHmd2HvjCF9MLHhNcwG2jgK3jY/view?usp=sharing",
       "Assistente Administrativo": "https://drive.google.com/file/d/1nmCLg5fWtylA0Y79_3NvTfKyyp31Dh18/view?usp=sharing",
@@ -300,10 +299,6 @@
       "Telemarketing": "https://drive.google.com/file/d/1ncKYyByfPDNoUMi5rAW_lEUqt7K2-7fj/view?usp=sharing"
     };
 
-    // ==========================================
-    // TEXTO DO WHATSAPP COM AS VARIÁVEIS {NOME}, {MATRICULA} E {LINK}
-    // As crases (`) permitem que as quebras de linha funcionem perfeitamente
-    // ==========================================
     const MENSAGEM_WHATSAPP = `✨🎓 BEM-VINDO(A) À EDUC CENTRO DE ENSINO! 🎓✨
 
 Olá, {NOME}! 🧡
@@ -319,43 +314,38 @@ Esse número será muito importante durante sua trajetória conosco. Salve-o em 
 Adicione estes números aos seus contatos:
 📱 (79) 8103-9888
 📱 (79) 8172-7038
-Eles serão alguns dos principais canais de comunicação da Educ com você, especialmente para assuntos relacionados à sala de aula, professores e coordenação.
 
 2️⃣ Conheça seu contrato
-Leia atentamente o Contrato de Prestação de Serviços, entregue no momento da sua matrícula. Nele estão reunidas informações importantes sobre sua formação e os serviços educacionais contratados.
+Leia atentamente o Contrato de Prestação de Serviços, entregue no momento da sua matrícula.
 
 3️⃣ Aulas práticas e direcionadas
-Seu curso contará com aulas práticas e aulas direcionadas, pensadas para contribuir com seu aprendizado e preparar você para aplicar os conhecimentos adquiridos na prática.
+Seu curso contará com aulas práticas e aulas direcionadas.
 
 4️⃣ Use o uniforme completo 👕
-Durante as aulas, utilize sempre o uniforme completo da Educ: camisa da escola, calça e tênis.
+Durante as aulas, utilize sempre o uniforme completo da Educ.
 
 5️⃣ Precisa de ajuda? Estamos à disposição! 💬
-Por meio dos nossos canais de atendimento, você poderá tirar dúvidas, enviar sugestões e solicitar documentos, como declarações, boletins, comprovantes de frequência, entre outros.
+Por meio dos nossos canais de atendimento, você poderá tirar dúvidas e solicitar documentos.
 
 6️⃣ Não poderá comparecer à aula? Avise-nos! 📢
-Caso não possa comparecer em algum dia, informe sua ausência antecipadamente e entre em contato conosco para solicitar o agendamento da reposição da aula, quando aplicável.
+Caso não possa comparecer, informe sua ausência antecipadamente.
 
 7️⃣ Atenção às aulas práticas! 💻
-Você receberá um link para realizar o agendamento das aulas práticas. Escolha entre os dias e horários disponíveis.
-⚠️ Lembre-se: a participação nas aulas práticas é obrigatória.
+Você receberá um link para realizar o agendamento. A participação nas aulas práticas é obrigatória.
 
 8️⃣ Venha preparado(a)! 🖊️💧
-Traga sempre sua caneta e sua garrafinha de água para se manter hidratado(a) e preparado(a) durante as aulas.
+Traga sempre sua caneta e sua garrafinha de água.
 
 9️⃣ Evite o uso do celular durante as aulas 📵
-O celular pode ser uma ferramenta importante para o aprendizado, mas seu uso inadequado pode prejudicar sua concentração e seu desempenho. Durante as aulas, utilize-o somente quando necessário ou quando orientado pelo professor.
+Durante as aulas, utilize-o somente quando necessário.
 
 🔎 QUER CONHECER MELHOR O SEU CURSO?
 Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
-Nele você encontrará informações importantes sobre o funcionamento da sua formação, organização das aulas e demais orientações acadêmicas.
 
 👉 Acesse aqui:
 {LINK}
 
-🧡 Conte com a Educ nessa nova jornada!
-Estamos felizes em ter você conosco e esperamos que essa seja uma experiência de muito aprendizado, desenvolvimento e conquistas!
-Seja muito bem-vindo(a) à Educ Centro de Ensino! 🎓✨`;
+🧡 Conte com a Educ nessa nova jornada!`;
 
     const usuariosPermitidos = { "33037295030528": "Leandro", "300820092795": "Daniel" };
     const adminsPermitidos = { "1312892099": "Davi", "34769849": "Theo" };
@@ -374,8 +364,8 @@ Seja muito bem-vindo(a) à Educ Centro de Ensino! 🎓✨`;
       { id: "radD9", lbl: "Foi cadastrado o Telefone de Emergência?" }
     ];
 
+    // Removido o item 1 de PDPC a seu pedido
     const checklistTarefas = [
-      { id: "chkP1", label: "Enviar mensagem do PDPC para os números Cadastrados" },
       { id: "chkP2", label: "Solicitar ao Aluno(a) que salve os dois números da Sala de Aula" },
       { id: "chkP3", label: "Funcionário salvou os contatos do Aluno conforme Protocolo" },
       { id: "chkP4", label: "Registrar a senha do Aluno(a) conforme protocolo" },
@@ -452,7 +442,8 @@ Seja muito bem-vindo(a) à Educ Centro de Ensino! 🎓✨`;
     function sair() { sessionStorage.clear(); location.reload(); }
 
     function calcularProgresso() {
-      let totalItems = 9 + 7 + 5; let preenchidos = 0;
+      // 9 dados + 6 tarefas (reduzido) + 5 validadões = 20 total
+      let totalItems = 9 + 6 + 5; let preenchidos = 0;
       perguntasDados.forEach(p => { if(document.querySelector(`input[name="${p.id}"]:checked`)) preenchidos++; });
       document.querySelectorAll('input[type="checkbox"].tracker:checked').forEach(() => preenchidos++);
       ["radDia", "radHorario", "radPacote", "radPos", "radCuid"].forEach(n => { if(document.querySelector(`input[name="${n}"]:checked`)) preenchidos++; });
@@ -510,22 +501,23 @@ Seja muito bem-vindo(a) à Educ Centro de Ensino! 🎓✨`;
       avancarSemAlerta(4);
     }
 
-    // --- FUNÇÃO INTELIGENTE DE ENVIO (O PULO DO GATO) ---
     async function enviarProServidor() {
       let btn = document.getElementById('btnEnviarFinal'); 
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando e Processando...'; btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...'; btn.disabled = true;
       
       let mat = document.getElementById('cMatricula').value;
       let nome = document.getElementById('cNome').value;
       let curso = document.getElementById('cCurso').value;
       let zapOriginal = document.getElementById('cWhats').value.trim();
       let email = document.getElementById('cEmail').value.trim();
-      
       let linkPdpc = LINKS_PDPC[curso] || "Link ainda não configurado para este curso";
+
+      let msgPronta = MENSAGEM_WHATSAPP.replace(/{NOME}/g, nome).replace(/{MATRICULA}/g, mat).replace(/{LINK}/g, linkPdpc);
 
       let payload = { 
         atendente: atendenteLogado, aluno: mat, nome: nome, curso: curso, 
         zap: zapOriginal || "Pendente", email: email || "Pendente", linkPdpc: linkPdpc,
+        mensagemCompleta: msgPronta, 
         statusChecklist: pctFinal + "%", situacaoGeral: (relatorioFinalCompilado.includes("OCORRÊNCIA")) ? "COM OCORRÊNCIA" : "OK" 
       };
 
@@ -533,21 +525,39 @@ Seja muito bem-vindo(a) à Educ Centro de Ensino! 🎓✨`;
         let response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "salvar_triagem", dados: payload, ocorrenciaGeral: relatorioFinalCompilado }) });
         await response.json();
         
-        let msgAlerta = "Dados salvos no CGD.";
+        let listaNumeros = [];
+        if(zapOriginal) {
+          // Extrai os números independentemente do formato digitado (, ou / ou - ou espaço)
+          listaNumeros = zapOriginal.split(/[,;/]+/).map(n => n.trim()).filter(n => n !== "");
+        }
         
-        if (zapOriginal && email) {
-          msgAlerta = "E-mail de boas-vindas disparado! Abrindo agora o WhatsApp para enviar a mensagem...";
-          chamarWhatsApp(zapOriginal, nome, linkPdpc, mat);
-        } else if (zapOriginal && !email) {
-          msgAlerta = "E-mail pendente (não informado). Abrindo o WhatsApp nativo para envio da mensagem...";
-          chamarWhatsApp(zapOriginal, nome, linkPdpc, mat);
-        } else if (!zapOriginal && email) {
-          msgAlerta = "WhatsApp pendente (não informado). E-mail enviado com sucesso com os acessos!";
+        let htmlBotoes = "";
+        let temEstatistica = "";
+
+        // Lógica de Múltiplos WhatsApps
+        if(listaNumeros.length > 0) {
+          htmlBotoes += `<div class="mt-4"><p class='fw-bold mb-2 text-dark' style='font-size:14px;'>Envie a mensagem para os ${listaNumeros.length} números encontrados:</p>`;
+          
+          listaNumeros.forEach((num, index) => {
+            let numLimpo = num.replace(/\D/g, ''); 
+            if (numLimpo.length === 10 || numLimpo.length === 11) { numLimpo = "55" + numLimpo; }
+            let urlZap = `whatsapp://send?phone=${numLimpo}&text=${encodeURIComponent(msgPronta)}`;
+            htmlBotoes += `<a href="${urlZap}" target="_blank" class="btn btn-success d-block mb-2 shadow-sm"><i class="fab fa-whatsapp fs-5 me-2"></i> Chamar ${num}</a>`;
+          });
+          
+          htmlBotoes += `</div><button class="btn btn-outline-secondary w-100 mt-2 fw-bold" onclick="fecharAlerta()">Já enviei (Finalizar)</button>`;
         } else {
-          msgAlerta = "Ficha salva com sucesso! (Atenção: E-mail e WhatsApp marcados como Pendentes na planilha).";
+           htmlBotoes = `<button class="btn btn-theme-primary px-4 py-2 w-100 fs-5 mt-3" onclick="fecharAlerta()">Finalizar Triagem</button>`;
         }
 
-        mostrarAlertaPersonalizado("Triagem Registrada!", msgAlerta, "sucesso", "Iniciar Nova Triagem");
+        document.getElementById('modalAlerta').classList.remove('oculto');
+        document.getElementById('inputAlertaPrompt').classList.add('oculto');
+        document.getElementById('tituloAlerta').innerText = "Triagem Registrada!";
+        
+        let statusText = email ? "<div class='alert alert-success p-2 mb-0'><i class='fas fa-envelope'></i> E-mail marketing enviado com sucesso!</div>" : "<div class='alert alert-warning p-2 mb-0'><i class='fas fa-exclamation-triangle'></i> O E-mail do aluno não foi informado.</div>";
+        document.getElementById('textoAlerta').innerHTML = statusText + htmlBotoes;
+        document.getElementById('iconeAlerta').innerHTML = '<i class="fas fa-check-circle text-success"></i>';
+        document.getElementById('botoesAlerta').innerHTML = ""; 
         
         document.querySelectorAll('input[type="text"], input[type="email"], select').forEach(i => i.value="");
         document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(i => i.checked=false);
@@ -558,18 +568,10 @@ Seja muito bem-vindo(a) à Educ Centro de Ensino! 🎓✨`;
       btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Salvar e Enviar Boas-Vindas'; btn.disabled = false;
     }
 
-    // Função que chama o aplicativo do WhatsApp e preenche a mensagem automaticamente
-    function chamarWhatsApp(numeroBruto, nome, link, matricula) {
-      let numLimpo = numeroBruto.replace(/\D/g, ''); 
-      if (numLimpo.length === 10 || numLimpo.length === 11) { numLimpo = "55" + numLimpo; } 
-      
-      let msgPronta = MENSAGEM_WHATSAPP
-        .replace("{NOME}", nome)
-        .replace("{MATRICULA}", matricula)
-        .replace("{LINK}", link);
-      
-      let urlZap = `whatsapp://send?phone=${numLimpo}&text=${encodeURIComponent(msgPronta)}`;
-      window.open(urlZap, '_self'); 
+    // NOVA FUNÇÃO: Exibe o texto gigante num modal bonitinho
+    window.mostrarRelatorioCompleto = function(idR) {
+      let texto = document.getElementById('txtOrig_'+idR).innerText;
+      mostrarAlertaPersonalizado("Detalhes da Ocorrência", `<div style="text-align: left; font-family: monospace; font-size: 13px; max-height: 250px; overflow-y: auto; background: #f4f5f7; padding: 15px; border-radius: 6px; border: 1px solid #ddd;">${texto.replace(/\n/g, '<br>')}</div>`, "aviso", "Fechar");
     }
 
     function formatarData(dStr) { if(!dStr) return ""; if(dStr.includes("T")) { let d = new Date(dStr); return d.toLocaleDateString('pt-BR') + " " + d.toLocaleTimeString('pt-BR'); } return dStr; }
@@ -592,10 +594,16 @@ Seja muito bem-vindo(a) à Educ Centro de Ensino! 🎓✨`;
             else if (linha[4] === "PENDENTE") badge = `<span class="badge bg-danger p-2 fs-6">PENDENTE</span>`;
             else badge = `<span class="badge bg-success p-2">RESOLVIDO</span>`;
             let dev = linha[5] ? `<div class="bg-success text-white p-2 rounded mt-2" style="font-size:12px; white-space: pre-wrap;"><i class="fas fa-check-circle"></i> ${linha[5]}</div>` : '';
+            
+            // O TEXTO FICA ESCONDIDO E UM BOTÃO APARECE PARA ECONOMIZAR ESPAÇO
             html += `<tr><td class="text-muted fw-bold">${formatarData(linha[0])}</td>
               <td><span class="fw-bold d-block text-dark" style="font-size: 15px;">Matrícula: ${linha[1]}</span><span class="small text-muted"><i class="fas fa-user-edit"></i> ${atendOriginal}</span></td>
-              <td><div class="report-box p-3" id="txtOrig_${idR}">${txtOriginal}</div></td>
-              <td class="text-center">${badge}${dev}</td><td class="text-center" style="vertical-align: top;"><button class="btn btn-secondary btn-acao w-100" onclick="abrirEditar(${idR}, '${atendOriginal}')">Editar</button></td></tr>`;
+              <td class="text-center">${badge}${dev}</td>
+              <td class="text-center">
+                <div id="txtOrig_${idR}" style="display:none;">${txtOriginal}</div>
+                <button class="btn btn-sm btn-outline-dark fw-bold" onclick="mostrarRelatorioCompleto(${idR})"><i class="fas fa-search me-1"></i> Ver Ocorrência</button>
+              </td>
+              <td class="text-center" style="vertical-align: top;"><button class="btn btn-secondary btn-acao w-100" onclick="abrirEditar(${idR}, '${atendOriginal}')"><i class="fas fa-edit"></i> Editar</button></td></tr>`;
           });
           tbody.innerHTML = html;
         } else tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">Nenhum registro encontrado no histórico.</td></tr>`;
