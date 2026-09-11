@@ -41,9 +41,11 @@
     
     .bloco-ocorrencia { background: #fff5eb; padding: 12px; border-radius: 6px; border-left: 3px solid var(--escola-laranja); margin-top: 10px; }
     .aviso-cgd { color: #dc3545; font-size: 12px; font-weight: bold; margin-top: 8px; background: #fff0f0; padding: 5px 8px; border-radius: 4px; border-left: 3px solid #dc3545;}
-    .report-box { background: #f8f9fa; border: 1px dashed var(--escola-laranja); font-family: monospace; font-size: 14px; color: #333; padding: 20px; border-radius: 6px; white-space: pre-wrap; text-align: left; }
     
-    .table-ui th { background-color: #f8f9fa; font-size: 13px; text-transform: uppercase; color: #555; }
+    /* SCROLL NA TABELA E CABEÇALHO FIXO */
+    .tabela-scroll { max-height: 480px; overflow-y: auto; }
+    .table-ui th { background-color: #f8f9fa; font-size: 13px; text-transform: uppercase; color: #555; position: sticky; top: 0; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
+    
     .btn-acao { padding: 4px 8px; font-size: 12px; margin-right: 4px; }
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(3px); }
@@ -81,9 +83,8 @@
     </div>
   </div>
 
-  <!-- AREA DO COLABORADOR (CRIAR TRIAGEM + HISTÓRICO GLOBAL) -->
+  <!-- AREA DO COLABORADOR -->
   <div id="areaColaborador" class="oculto">
-    
     <div class="card-ui mb-3" style="padding: 15px;">
       <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
         <div>
@@ -98,17 +99,17 @@
       </div>
     </div>
 
-    <!-- WIZARD (PASSOS) -->
+    <!-- WIZARD -->
     <div class="card-ui">
       
-      <!-- PASSO 1: INFORMAÇÕES BASE DO ALUNO -->
+      <!-- PASSO 1: INFORMAÇÕES BASE -->
       <div id="passo1" class="passo-form">
         <h5 class="section-title">1. Informações Básicas e Conferência</h5>
         
         <div class="row g-3 mb-4 bg-light p-3 rounded border">
           <div class="col-md-3">
             <label class="fw-bold mb-1">Matrícula *</label>
-            <input type="text" id="cMatricula" class="form-control" placeholder="Ex: 12345">
+            <input type="text" id="cMatricula" class="form-control" placeholder="Ex: 1254">
           </div>
           <div class="col-md-5">
             <label class="fw-bold mb-1">Nome do Aluno(a) *</label>
@@ -134,11 +135,19 @@
               <option value="Telemarketing">Telemarketing</option>
             </select>
           </div>
+          
+          <!-- NOVO SISTEMA DE WHATSAPP DINÂMICO COM MÁSCARA -->
           <div class="col-md-6">
-            <label class="fw-bold mb-1"><i class="fab fa-whatsapp text-success"></i> WhatsApp do Aluno</label>
-            <input type="text" id="cWhats" class="form-control" placeholder="Ex: 799999999, 798888888">
-            <small class="text-muted">Separe por vírgula se houver mais de um número.</small>
+            <label class="fw-bold mb-1"><i class="fab fa-whatsapp text-success"></i> WhatsApp (Com DDD)</label>
+            <div id="containerZaps">
+              <div class="input-group mb-2">
+                <input type="text" class="form-control input-zap" placeholder="(00) 0 0000-0000" oninput="aplicarMascara(this)" maxlength="16">
+                <button class="btn btn-outline-secondary" type="button" onclick="adicionarCampoZap()" title="Adicionar mais um número"><b>+</b></button>
+              </div>
+            </div>
+            <small class="text-muted">Clique no [+] para adicionar número da Mãe/Pai.</small>
           </div>
+
           <div class="col-md-6">
             <label class="fw-bold mb-1"><i class="fas fa-envelope text-primary"></i> E-mail do Aluno</label>
             <input type="email" id="cEmail" class="form-control" placeholder="aluno@email.com">
@@ -155,7 +164,6 @@
       <!-- PASSO 2 -->
       <div id="passo2" class="passo-form oculto">
         <h5 class="section-title">2. Protocolo de Acolhimento</h5>
-        <p class="text-muted mb-3"><i class="fas fa-info-circle text-primary"></i> Marque as etapas do protocolo que já foram realizadas.</p>
         <div id="areaChecklist" class="mb-4 row g-3"></div>
         <div class="d-flex justify-content-between border-top pt-4">
           <button class="btn btn-secondary px-4 py-2 fs-6" onclick="avancarSemAlerta(1)"><i class="fas fa-chevron-left me-2"></i> Voltar</button>
@@ -166,43 +174,12 @@
       <!-- PASSO 3 -->
       <div id="passo3" class="passo-form oculto">
         <h5 class="section-title">3. Validação de Informações</h5>
-        <p class="text-muted mb-3"><i class="fas fa-info-circle text-primary"></i> Responda as validações abaixo. Se houver divergência, o sistema exigirá que você relate o erro.</p>
         <div class="row g-3 mb-4">
-          <div class="col-md-6">
-            <div class="pergunta-box">
-              <span class="pergunta-texto">Dia do Curso está correto conforme o contrato? *</span>
-              <div><input type="radio" name="radDia" class="tracker" value="OK" onchange="toggleBox('obsDia', false)"> Sim <span class="mx-2"></span> <input type="radio" name="radDia" class="tracker" value="ERRO" onchange="toggleBox('obsDia', true)"> Não</div>
-              <div id="obsDia" class="bloco-ocorrencia oculto"><input type="text" id="txtObsDia" class="form-control" placeholder="Descreva a divergência de dia encontrada"></div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="pergunta-box">
-              <span class="pergunta-texto">Horário do Curso está correto? *</span>
-              <div><input type="radio" name="radHorario" class="tracker" value="OK" onchange="toggleBox('obsHora', false)"> Sim <span class="mx-2"></span> <input type="radio" name="radHorario" class="tracker" value="ERRO" onchange="toggleBox('obsHora', true)"> Não</div>
-              <div id="obsHora" class="bloco-ocorrencia oculto"><input type="text" id="txtObsHora" class="form-control" placeholder="Descreva a divergência de horário encontrada"></div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="pergunta-box">
-              <span class="pergunta-texto">Pacote do Curso (Disciplinas) está correto? *</span>
-              <div><input type="radio" name="radPacote" class="tracker" value="OK" onchange="toggleBox('obsPac', false)"> Sim <span class="mx-2"></span> <input type="radio" name="radPacote" class="tracker" value="ERRO" onchange="toggleBox('obsPac', true)"> Não</div>
-              <div id="obsPac" class="bloco-ocorrencia oculto"><input type="text" id="txtObsPac" class="form-control" placeholder="Descreva a divergência do pacote encontrada"></div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="pergunta-box">
-              <span class="pergunta-texto">Existem pendências Registradas do Pós-venda? *</span>
-              <div><input type="radio" name="radPos" class="tracker" value="OK" onchange="toggleBox('obsPos', false)"> Não <span class="mx-2"></span> <input type="radio" name="radPos" class="tracker" value="ERRO" onchange="toggleBox('obsPos', true)"> Sim</div>
-              <div id="obsPos" class="bloco-ocorrencia oculto"><input type="text" id="txtObsPos" class="form-control" placeholder="Descreva qual é a pendência do pós-venda"></div>
-            </div>
-          </div>
-          <div class="col-md-12">
-            <div class="pergunta-box">
-              <span class="pergunta-texto">Esse aluno necessita de Cuidados Especiais (Saúde/Aprendizagem)? *</span>
-              <div><input type="radio" name="radCuid" class="tracker" value="OK" onchange="toggleBox('obsCuid', false)"> Não <span class="mx-2"></span> <input type="radio" name="radCuid" class="tracker" value="ERRO" onchange="toggleBox('obsCuid', true)"> Sim</div>
-              <div id="obsCuid" class="bloco-ocorrencia oculto"><input type="text" id="txtObsCuid" class="form-control" placeholder="Descreva quais os cuidados especiais necessários"></div>
-            </div>
-          </div>
+          <div class="col-md-6"><div class="pergunta-box"><span class="pergunta-texto">Dia do Curso está correto? *</span><div><input type="radio" name="radDia" class="tracker" value="OK" onchange="toggleBox('obsDia', false)"> Sim <span class="mx-2"></span> <input type="radio" name="radDia" class="tracker" value="ERRO" onchange="toggleBox('obsDia', true)"> Não</div><div id="obsDia" class="bloco-ocorrencia oculto"><input type="text" id="txtObsDia" class="form-control" placeholder="Descreva a divergência"></div></div></div>
+          <div class="col-md-6"><div class="pergunta-box"><span class="pergunta-texto">Horário do Curso está correto? *</span><div><input type="radio" name="radHorario" class="tracker" value="OK" onchange="toggleBox('obsHora', false)"> Sim <span class="mx-2"></span> <input type="radio" name="radHorario" class="tracker" value="ERRO" onchange="toggleBox('obsHora', true)"> Não</div><div id="obsHora" class="bloco-ocorrencia oculto"><input type="text" id="txtObsHora" class="form-control" placeholder="Descreva a divergência"></div></div></div>
+          <div class="col-md-6"><div class="pergunta-box"><span class="pergunta-texto">Pacote do Curso (Disciplinas) está correto? *</span><div><input type="radio" name="radPacote" class="tracker" value="OK" onchange="toggleBox('obsPac', false)"> Sim <span class="mx-2"></span> <input type="radio" name="radPacote" class="tracker" value="ERRO" onchange="toggleBox('obsPac', true)"> Não</div><div id="obsPac" class="bloco-ocorrencia oculto"><input type="text" id="txtObsPac" class="form-control" placeholder="Descreva a divergência"></div></div></div>
+          <div class="col-md-6"><div class="pergunta-box"><span class="pergunta-texto">Existem pendências do Pós-venda? *</span><div><input type="radio" name="radPos" class="tracker" value="OK" onchange="toggleBox('obsPos', false)"> Não <span class="mx-2"></span> <input type="radio" name="radPos" class="tracker" value="ERRO" onchange="toggleBox('obsPos', true)"> Sim</div><div id="obsPos" class="bloco-ocorrencia oculto"><input type="text" id="txtObsPos" class="form-control" placeholder="Qual pendência?"></div></div></div>
+          <div class="col-md-12"><div class="pergunta-box"><span class="pergunta-texto">Esse aluno necessita de Cuidados Especiais (Saúde/Aprendizagem)? *</span><div><input type="radio" name="radCuid" class="tracker" value="OK" onchange="toggleBox('obsCuid', false)"> Não <span class="mx-2"></span> <input type="radio" name="radCuid" class="tracker" value="ERRO" onchange="toggleBox('obsCuid', true)"> Sim</div><div id="obsCuid" class="bloco-ocorrencia oculto"><input type="text" id="txtObsCuid" class="form-control" placeholder="Quais os cuidados?"></div></div></div>
         </div>
         <div class="d-flex justify-content-between border-top pt-4">
           <button class="btn btn-secondary px-4 py-2 fs-6" onclick="avancarSemAlerta(2)"><i class="fas fa-chevron-left me-2"></i> Voltar</button>
@@ -210,7 +187,7 @@
         </div>
       </div>
 
-      <!-- PASSO 4 (RELATÓRIO INTELIGENTE E ENVIO) -->
+      <!-- PASSO 4 -->
       <div id="passo4" class="passo-form oculto text-center">
         <h4 id="tituloRelatorio" class="fw-bold mb-4"></h4>
         <div id="boxRelatorioGeral" class="oculto mb-4">
@@ -233,13 +210,14 @@
     </div>
   </div>
 
-  <!-- TABELÃO DE HISTÓRICO -->
+  <!-- TABELÃO DE HISTÓRICO COM SCROLL -->
   <div id="tabelaHistorico" class="card-ui oculto">
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
       <h5 class="fw-bold m-0"><i class="fas fa-history me-2"></i> Histórico das Triagens</h5>
       <button class="btn btn-outline-secondary" onclick="buscarHistorico()"><i class="fas fa-sync-alt me-2"></i> Atualizar Tabela</button>
     </div>
-    <div class="table-responsive">
+    
+    <div class="table-responsive tabela-scroll">
       <table class="table table-ui table-hover text-start">
         <thead><tr><th width="12%">Data</th><th width="20%">Aluno/Colab.</th><th width="20%">Status</th><th width="25%">Relatório</th><th width="23%">Ações</th></tr></thead>
         <tbody id="corpoTabela"><tr><td colspan="5" class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin fs-4"></i><br>Carregando histórico...</td></tr></tbody>
@@ -247,33 +225,20 @@
     </div>
   </div>
 
-  <!-- MODAIS DE EDIÇÃO E RESOLUÇÃO -->
+  <!-- MODAIS DE EDIÇÃO -->
   <div class="modal" tabindex="-1" id="modalDevolutiva" style="background: rgba(0,0,0,0.5);">
     <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
       <div class="modal-header bg-dark text-white"><h5 class="modal-title m-0">Resolver Ocorrência</h5></div>
-      <div class="modal-body">
-        <label class="fw-bold text-dark">Descreva a solução ou acompanhamento realizado:</label>
-        <textarea id="txtDevolutiva" class="form-control mt-2" rows="4"></textarea>
-        <input type="hidden" id="linhaAlvoDevolutiva">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="fecharModais()">Cancelar</button>
-        <button type="button" class="btn btn-theme-primary" onclick="salvarDevolutiva()">Salvar e Resolver</button>
-      </div>
+      <div class="modal-body"><textarea id="txtDevolutiva" class="form-control mt-2" rows="4"></textarea><input type="hidden" id="linhaAlvoDevolutiva"></div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="fecharModais()">Cancelar</button><button type="button" class="btn btn-theme-primary" onclick="salvarDevolutiva()">Salvar</button></div>
     </div></div>
   </div>
 
   <div class="modal" tabindex="-1" id="modalEdicao" style="background: rgba(0,0,0,0.5);">
     <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
       <div class="modal-header bg-secondary text-white"><h5 class="modal-title m-0">Editar Relatório</h5></div>
-      <div class="modal-body">
-        <textarea id="txtEdicao" class="form-control mt-1" rows="12" style="font-family: monospace; font-size:14px;"></textarea>
-        <input type="hidden" id="linhaAlvoEdicao">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="fecharModais()">Cancelar</button>
-        <button type="button" class="btn btn-theme-primary" onclick="salvarEdicao()">Salvar Alterações</button>
-      </div>
+      <div class="modal-body"><textarea id="txtEdicao" class="form-control mt-1" rows="12" style="font-family: monospace; font-size:14px;"></textarea><input type="hidden" id="linhaAlvoEdicao"></div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="fecharModais()">Cancelar</button><button type="button" class="btn btn-theme-primary" onclick="salvarEdicao()">Salvar</button></div>
     </div></div>
   </div>
 
@@ -299,21 +264,22 @@
       "Telemarketing": "https://drive.google.com/file/d/1ncKYyByfPDNoUMi5rAW_lEUqt7K2-7fj/view?usp=sharing"
     };
 
+    // FORMATO DE TEXTO EXATAMENTE COMO VOCÊ PEDIU
     const MENSAGEM_WHATSAPP = `✨🎓 BEM-VINDO(A) À EDUC CENTRO DE ENSINO! 🎓✨
 
 Olá, {NOME}! 🧡
+
 É uma grande alegria receber você na Educ Centro de Ensino!
 Hoje damos início a uma nova jornada de aprendizado, crescimento e muitas conquistas. 🚀✨
 
 📌 Sua matrícula é: {MATRICULA}
-Esse número será muito importante durante sua trajetória conosco. Salve-o em seus contatos, pois ele poderá ser utilizado para sua identificação e para facilitar nossa comunicação.
 
 ⚠️ ANTES DE COMEÇAR, LEIA COM ATENÇÃO AS INFORMAÇÕES IMPORTANTES ABAIXO: ⚠️
 
 1️⃣ Salve nossos números de atendimento
+
 Adicione estes números aos seus contatos:
-📱 (79) 8103-9888
-📱 (79) 8172-7038
+📱 (79) 8103-9888 &📱 (79) 8172-7038
 
 2️⃣ Conheça seu contrato
 Leia atentamente o Contrato de Prestação de Serviços, entregue no momento da sua matrícula.
@@ -342,8 +308,7 @@ Durante as aulas, utilize-o somente quando necessário.
 🔎 QUER CONHECER MELHOR O SEU CURSO?
 Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
 
-👉 Acesse aqui:
-{LINK}
+👉 Acesse aqui: {LINK}
 
 🧡 Conte com a Educ nessa nova jornada!`;
 
@@ -364,7 +329,6 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
       { id: "radD9", lbl: "Foi cadastrado o Telefone de Emergência?" }
     ];
 
-    // Removido o item 1 de PDPC a seu pedido
     const checklistTarefas = [
       { id: "chkP2", label: "Solicitar ao Aluno(a) que salve os dois números da Sala de Aula" },
       { id: "chkP3", label: "Funcionário salvou os contatos do Aluno conforme Protocolo" },
@@ -376,9 +340,7 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
 
     window.onload = () => {
       let htmlDados = "";
-      perguntasDados.forEach(p => {
-        htmlDados += `<div class="col-md-6"><div class="pergunta-box"><span class="pergunta-texto">${p.lbl}</span><div><input type="radio" name="${p.id}" class="tracker" value="Sim" onchange="verificarNao(this)"> Sim <span class="mx-2"></span> <input type="radio" name="${p.id}" class="tracker" value="Não" onchange="verificarNao(this)"> Não</div><div class="aviso-cgd oculto"><i class="fas fa-exclamation-triangle"></i> Faça a correção no CGD.</div></div></div>`;
-      });
+      perguntasDados.forEach(p => { htmlDados += `<div class="col-md-6"><div class="pergunta-box"><span class="pergunta-texto">${p.lbl}</span><div><input type="radio" name="${p.id}" class="tracker" value="Sim" onchange="verificarNao(this)"> Sim <span class="mx-2"></span> <input type="radio" name="${p.id}" class="tracker" value="Não" onchange="verificarNao(this)"> Não</div><div class="aviso-cgd oculto"><i class="fas fa-exclamation-triangle"></i> Faça a correção no CGD.</div></div></div>`; });
       document.getElementById('areaPerguntasDados').innerHTML = htmlDados;
 
       let htmlCheck = "";
@@ -386,13 +348,24 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
       document.getElementById('areaChecklist').innerHTML = htmlCheck;
       
       document.querySelectorAll('.tracker').forEach(el => { el.addEventListener('change', calcularProgresso); });
-
-      if(sessionStorage.getItem('logadoEduc') === 'true') {
-        atendenteLogado = sessionStorage.getItem('nomeEduc');
-        isCGD = (sessionStorage.getItem('isCGDEduc') === 'true');
-        restaurarSessao();
-      }
+      if(sessionStorage.getItem('logadoEduc') === 'true') { atendenteLogado = sessionStorage.getItem('nomeEduc'); isCGD = (sessionStorage.getItem('isCGDEduc') === 'true'); restaurarSessao(); }
     };
+
+    // MÁSCARA INTELIGENTE DE WHATSAPP E BOTÃO +
+    function aplicarMascara(input) {
+      let v = input.value.replace(/\D/g, "");
+      if (v.length > 11) v = v.slice(0, 11);
+      if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
+      if (v.length > 9) v = `${v.slice(0, 10)}-${v.slice(10)}`;
+      input.value = v;
+    }
+    function adicionarCampoZap() {
+      let div = document.createElement("div");
+      div.className = "input-group mb-2";
+      div.innerHTML = `<input type="text" class="form-control input-zap" placeholder="(00) 0 0000-0000" oninput="aplicarMascara(this)" maxlength="16">
+                       <button class="btn btn-outline-danger" type="button" onclick="this.parentElement.remove()" title="Remover"><i class="fas fa-trash"></i></button>`;
+      document.getElementById("containerZaps").appendChild(div);
+    }
 
     function verificarNao(radio) {
       let boxAviso = radio.closest('.pergunta-box').querySelector('.aviso-cgd');
@@ -400,20 +373,16 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
     }
 
     function mostrarAlertaPersonalizado(titulo, mensagem, tipoIcone, textoBotao = "Entendi", acaoSecundaria = null) {
-      document.getElementById('modalAlerta').classList.remove('oculto');
-      document.getElementById('inputAlertaPrompt').classList.add('oculto');
-      document.getElementById('tituloAlerta').innerText = titulo;
-      document.getElementById('textoAlerta').innerHTML = mensagem;
-      
+      document.getElementById('modalAlerta').classList.remove('oculto'); document.getElementById('inputAlertaPrompt').classList.add('oculto');
+      document.getElementById('tituloAlerta').innerText = titulo; document.getElementById('textoAlerta').innerHTML = mensagem;
       let icone = document.getElementById('iconeAlerta');
       if(tipoIcone === 'erro') icone.innerHTML = '<i class="fas fa-times-circle text-danger"></i>';
       else if(tipoIcone === 'aviso') icone.innerHTML = '<i class="fas fa-exclamation-triangle text-warning"></i>';
       else if(tipoIcone === 'sucesso') icone.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
       
       let botoesDiv = document.getElementById('botoesAlerta');
-      if(acaoSecundaria) {
-        botoesDiv.innerHTML = `<button class="btn btn-secondary px-4 py-2 w-100 fw-bold" onclick="fecharAlerta()">Corrigir Pendência</button><button class="btn btn-warning text-dark px-4 py-2 w-100 fw-bold" onclick="${acaoSecundaria}">Avançar assim mesmo</button>`;
-      } else { botoesDiv.innerHTML = `<button class="btn btn-theme-primary px-4 py-2 w-100 fs-5" onclick="fecharAlerta()">${textoBotao}</button>`; }
+      if(acaoSecundaria) { botoesDiv.innerHTML = `<button class="btn btn-secondary px-4 py-2 w-100 fw-bold" onclick="fecharAlerta()">Corrigir Pendência</button><button class="btn btn-warning text-dark px-4 py-2 w-100 fw-bold" onclick="${acaoSecundaria}">Avançar assim mesmo</button>`; } 
+      else { botoesDiv.innerHTML = `<button class="btn btn-theme-primary px-4 py-2 w-100 fs-5" onclick="fecharAlerta()">${textoBotao}</button>`; }
     }
     
     function fecharAlerta() { document.getElementById('modalAlerta').classList.add('oculto'); }
@@ -422,32 +391,23 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
       let senha = document.getElementById('inputSenha').value.trim();
       if(!senha) return mostrarAlertaPersonalizado("Erro", "Digite a senha.", "erro");
       let nomeColab = usuariosPermitidos[senha]; let nomeAdmin = adminsPermitidos[senha];
-
-      if(tipoBtn === 'cgd') {
-        if(nomeAdmin) { isCGD = true; atendenteLogado = nomeAdmin; salvarSessao(); restaurarSessao(); } 
-        else mostrarAlertaPersonalizado("Acesso Negado", "Sem permissão.", "erro");
-      } else {
-        if(nomeAdmin || nomeColab) { isCGD = false; atendenteLogado = nomeAdmin || nomeColab; salvarSessao(); restaurarSessao(); } 
-        else mostrarAlertaPersonalizado("Acesso Negado", "Senha inválida.", "erro");
-      }
+      if(tipoBtn === 'cgd') { if(nomeAdmin) { isCGD = true; atendenteLogado = nomeAdmin; salvarSessao(); restaurarSessao(); } else mostrarAlertaPersonalizado("Acesso Negado", "Sem permissão.", "erro"); } 
+      else { if(nomeAdmin || nomeColab) { isCGD = false; atendenteLogado = nomeAdmin || nomeColab; salvarSessao(); restaurarSessao(); } else mostrarAlertaPersonalizado("Acesso Negado", "Senha inválida.", "erro"); }
     }
     
     function salvarSessao() { sessionStorage.setItem('logadoEduc', 'true'); sessionStorage.setItem('nomeEduc', atendenteLogado); sessionStorage.setItem('isCGDEduc', isCGD); }
     function restaurarSessao() {
       document.getElementById("telaLogin").classList.add("oculto"); document.getElementById("tabelaHistorico").classList.remove("oculto");
-      if(isCGD) document.getElementById("areaCGD").classList.remove("oculto");
-      else { document.getElementById("lblNomeColab").innerText = atendenteLogado; document.getElementById("areaColaborador").classList.remove("oculto"); }
+      if(isCGD) document.getElementById("areaCGD").classList.remove("oculto"); else { document.getElementById("lblNomeColab").innerText = atendenteLogado; document.getElementById("areaColaborador").classList.remove("oculto"); }
       buscarHistorico();
     }
     function sair() { sessionStorage.clear(); location.reload(); }
 
     function calcularProgresso() {
-      // 9 dados + 6 tarefas (reduzido) + 5 validadões = 20 total
       let totalItems = 9 + 6 + 5; let preenchidos = 0;
       perguntasDados.forEach(p => { if(document.querySelector(`input[name="${p.id}"]:checked`)) preenchidos++; });
       document.querySelectorAll('input[type="checkbox"].tracker:checked').forEach(() => preenchidos++);
       ["radDia", "radHorario", "radPacote", "radPos", "radCuid"].forEach(n => { if(document.querySelector(`input[name="${n}"]:checked`)) preenchidos++; });
-      
       let pct = Math.round((preenchidos / totalItems) * 100); if(pct>100) pct=100;
       document.getElementById('barraProgresso').style.width = pct + '%'; document.getElementById('txtProgresso').innerText = pct + '%';
     }
@@ -456,9 +416,7 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
 
     function tentarAvancar(atual, prox) {
       if(atual === 1) {
-        if(!document.getElementById('cMatricula').value.trim() || !document.getElementById('cNome').value.trim() || !document.getElementById('cCurso').value) {
-          return mostrarAlertaPersonalizado("Obrigatório", "Preencha a Matrícula, o Nome e o Curso do aluno.", "erro");
-        }
+        if(!document.getElementById('cMatricula').value.trim() || !document.getElementById('cNome').value.trim() || !document.getElementById('cCurso').value) { return mostrarAlertaPersonalizado("Obrigatório", "Preencha a Matrícula, o Nome e o Curso do aluno.", "erro"); }
         let temVazio = false; let temNao = false;
         perguntasDados.forEach(p => { let sel = document.querySelector(`input[name="${p.id}"]:checked`); if(!sel) temVazio = true; else if(sel.value === "Não") temNao = true; });
         if(temVazio || temNao) return mostrarAlertaPersonalizado("Divergência", "Deseja avançar sem concluir a conferência de dados?", "aviso", "", `fecharAlerta(); avancarSemAlerta(${prox});`);
@@ -508,15 +466,19 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
       let mat = document.getElementById('cMatricula').value;
       let nome = document.getElementById('cNome').value;
       let curso = document.getElementById('cCurso').value;
-      let zapOriginal = document.getElementById('cWhats').value.trim();
       let email = document.getElementById('cEmail').value.trim();
-      let linkPdpc = LINKS_PDPC[curso] || "Link ainda não configurado para este curso";
+      
+      // Coletando múltiplos números formatados
+      let listaZaps = [];
+      document.querySelectorAll(".input-zap").forEach(inp => { if(inp.value.length >= 14) listaZaps.push(inp.value); });
+      let zapString = listaZaps.join(" | ") || "Pendente";
 
+      let linkPdpc = LINKS_PDPC[curso] || "Link ainda não configurado para este curso";
       let msgPronta = MENSAGEM_WHATSAPP.replace(/{NOME}/g, nome).replace(/{MATRICULA}/g, mat).replace(/{LINK}/g, linkPdpc);
 
       let payload = { 
         atendente: atendenteLogado, aluno: mat, nome: nome, curso: curso, 
-        zap: zapOriginal || "Pendente", email: email || "Pendente", linkPdpc: linkPdpc,
+        zap: zapString, email: email || "Pendente", linkPdpc: linkPdpc,
         mensagemCompleta: msgPronta, 
         statusChecklist: pctFinal + "%", situacaoGeral: (relatorioFinalCompilado.includes("OCORRÊNCIA")) ? "COM OCORRÊNCIA" : "OK" 
       };
@@ -525,27 +487,16 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
         let response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "salvar_triagem", dados: payload, ocorrenciaGeral: relatorioFinalCompilado }) });
         await response.json();
         
-        let listaNumeros = [];
-        if(zapOriginal) {
-          // Extrai os números independentemente do formato digitado (, ou / ou - ou espaço)
-          listaNumeros = zapOriginal.split(/[,;/]+/).map(n => n.trim()).filter(n => n !== "");
-        }
-        
         let htmlBotoes = "";
-        let temEstatistica = "";
-
-        // Lógica de Múltiplos WhatsApps
-        if(listaNumeros.length > 0) {
-          htmlBotoes += `<div class="mt-4"><p class='fw-bold mb-2 text-dark' style='font-size:14px;'>Envie a mensagem para os ${listaNumeros.length} números encontrados:</p>`;
-          
-          listaNumeros.forEach((num, index) => {
+        if(listaZaps.length > 0) {
+          htmlBotoes += `<div class="mt-4"><p class='fw-bold mb-2 text-dark' style='font-size:14px;'>Enviar WhatsApp (${listaZaps.length} números encontrados):</p>`;
+          listaZaps.forEach((num, index) => {
             let numLimpo = num.replace(/\D/g, ''); 
-            if (numLimpo.length === 10 || numLimpo.length === 11) { numLimpo = "55" + numLimpo; }
+            if (numLimpo.length === 10 || numLimpo.length === 11) numLimpo = "55" + numLimpo;
             let urlZap = `whatsapp://send?phone=${numLimpo}&text=${encodeURIComponent(msgPronta)}`;
             htmlBotoes += `<a href="${urlZap}" target="_blank" class="btn btn-success d-block mb-2 shadow-sm"><i class="fab fa-whatsapp fs-5 me-2"></i> Chamar ${num}</a>`;
           });
-          
-          htmlBotoes += `</div><button class="btn btn-outline-secondary w-100 mt-2 fw-bold" onclick="fecharAlerta()">Já enviei (Finalizar)</button>`;
+          htmlBotoes += `</div><button class="btn btn-outline-secondary w-100 mt-2 fw-bold" onclick="fecharAlerta()">Finalizar Atendimento</button>`;
         } else {
            htmlBotoes = `<button class="btn btn-theme-primary px-4 py-2 w-100 fs-5 mt-3" onclick="fecharAlerta()">Finalizar Triagem</button>`;
         }
@@ -553,22 +504,23 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
         document.getElementById('modalAlerta').classList.remove('oculto');
         document.getElementById('inputAlertaPrompt').classList.add('oculto');
         document.getElementById('tituloAlerta').innerText = "Triagem Registrada!";
-        
         let statusText = email ? "<div class='alert alert-success p-2 mb-0'><i class='fas fa-envelope'></i> E-mail marketing enviado com sucesso!</div>" : "<div class='alert alert-warning p-2 mb-0'><i class='fas fa-exclamation-triangle'></i> O E-mail do aluno não foi informado.</div>";
         document.getElementById('textoAlerta').innerHTML = statusText + htmlBotoes;
         document.getElementById('iconeAlerta').innerHTML = '<i class="fas fa-check-circle text-success"></i>';
         document.getElementById('botoesAlerta').innerHTML = ""; 
         
+        // Limpar tudo para a próxima
         document.querySelectorAll('input[type="text"], input[type="email"], select').forEach(i => i.value="");
         document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(i => i.checked=false);
         document.querySelectorAll('.bloco-ocorrencia, .aviso-cgd').forEach(b => b.classList.add('oculto'));
+        // Reseta os Zaps deixando só um campo limpo
+        document.getElementById("containerZaps").innerHTML = `<div class="input-group mb-2"><input type="text" class="form-control input-zap" placeholder="(00) 0 0000-0000" oninput="aplicarMascara(this)" maxlength="16"><button class="btn btn-outline-secondary" type="button" onclick="adicionarCampoZap()" title="Adicionar mais um número"><b>+</b></button></div>`;
         calcularProgresso(); avancarSemAlerta(1); buscarHistorico();
 
       } catch(e) { mostrarAlertaPersonalizado("Erro", "Falha de Conexão. Tente novamente.", "erro"); }
       btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Salvar e Enviar Boas-Vindas'; btn.disabled = false;
     }
 
-    // NOVA FUNÇÃO: Exibe o texto gigante num modal bonitinho
     window.mostrarRelatorioCompleto = function(idR) {
       let texto = document.getElementById('txtOrig_'+idR).innerText;
       mostrarAlertaPersonalizado("Detalhes da Ocorrência", `<div style="text-align: left; font-family: monospace; font-size: 13px; max-height: 250px; overflow-y: auto; background: #f4f5f7; padding: 15px; border-radius: 6px; border: 1px solid #ddd;">${texto.replace(/\n/g, '<br>')}</div>`, "aviso", "Fechar");
@@ -595,18 +547,17 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
             else badge = `<span class="badge bg-success p-2">RESOLVIDO</span>`;
             let dev = linha[5] ? `<div class="bg-success text-white p-2 rounded mt-2" style="font-size:12px; white-space: pre-wrap;"><i class="fas fa-check-circle"></i> ${linha[5]}</div>` : '';
             
-            // O TEXTO FICA ESCONDIDO E UM BOTÃO APARECE PARA ECONOMIZAR ESPAÇO
             html += `<tr><td class="text-muted fw-bold">${formatarData(linha[0])}</td>
               <td><span class="fw-bold d-block text-dark" style="font-size: 15px;">Matrícula: ${linha[1]}</span><span class="small text-muted"><i class="fas fa-user-edit"></i> ${atendOriginal}</span></td>
               <td class="text-center">${badge}${dev}</td>
               <td class="text-center">
                 <div id="txtOrig_${idR}" style="display:none;">${txtOriginal}</div>
-                <button class="btn btn-sm btn-outline-dark fw-bold" onclick="mostrarRelatorioCompleto(${idR})"><i class="fas fa-search me-1"></i> Ver Ocorrência</button>
+                <button class="btn btn-sm btn-outline-dark fw-bold" onclick="mostrarRelatorioCompleto(${idR})"><i class="fas fa-search me-1"></i> Ver</button>
               </td>
               <td class="text-center" style="vertical-align: top;"><button class="btn btn-secondary btn-acao w-100" onclick="abrirEditar(${idR}, '${atendOriginal}')"><i class="fas fa-edit"></i> Editar</button></td></tr>`;
           });
           tbody.innerHTML = html;
-        } else tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">Nenhum registro encontrado no histórico.</td></tr>`;
+        } else tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">Nenhum registro encontrado.</td></tr>`;
       } catch (err) { tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-danger fw-bold">Erro de conexão.</td></tr>`; }
     }
   </script>
