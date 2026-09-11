@@ -44,10 +44,10 @@
     .report-box { background: #f8f9fa; border: 1px dashed var(--escola-laranja); font-family: monospace; font-size: 14px; color: #333; padding: 20px; border-radius: 6px; white-space: pre-wrap; text-align: left; }
     
     /* SCROLL NA TABELA E CABEÇALHO FIXO */
-    .tabela-scroll { max-height: 480px; overflow-y: auto; }
+    .tabela-scroll { max-height: 520px; overflow-y: auto; }
     .table-ui th { background-color: #f8f9fa; font-size: 13px; text-transform: uppercase; color: #555; position: sticky; top: 0; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
     
-    .btn-acao { padding: 4px 8px; font-size: 12px; margin-right: 4px; }
+    .btn-acao { padding: 6px 10px; font-size: 13px; margin-bottom: 5px; font-weight: bold;}
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(3px); }
     .modal-custom { background: #fff; width: 90%; max-width: 480px; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); border-top: 6px solid var(--escola-laranja); }
@@ -71,7 +71,7 @@
     </div>
   </div>
 
-  <!-- TELA DE LOGIN ÚNICO -->
+  <!-- TELA DE LOGIN -->
   <div id="telaLogin" class="card-ui card-login text-center">
     <i class="fas fa-id-badge mb-3" style="font-size: 50px; color: var(--escola-laranja);"></i>
     <h4 class="fw-bold text-dark mb-4">Sistema de Check In e Triagem</h4>
@@ -106,7 +106,6 @@
       <!-- PASSO 1 -->
       <div id="passo1" class="passo-form">
         <h5 class="section-title">1. Informações Básicas e Conferência</h5>
-        
         <div class="row g-3 mb-4 bg-light p-3 rounded border">
           <div class="col-md-3"><label class="fw-bold mb-1">Matrícula *</label><input type="text" id="cMatricula" class="form-control" placeholder="Ex: 1254"></div>
           <div class="col-md-5"><label class="fw-bold mb-1">Nome do Aluno(a) *</label><input type="text" id="cNome" class="form-control" placeholder="Nome completo"></div>
@@ -129,7 +128,6 @@
               <option value="Telemarketing">Telemarketing</option>
             </select>
           </div>
-          
           <div class="col-md-6">
             <label class="fw-bold mb-1"><i class="fab fa-whatsapp text-success"></i> WhatsApp (Com DDD)</label>
             <div id="containerZaps">
@@ -138,16 +136,12 @@
                 <button class="btn btn-outline-secondary" type="button" onclick="adicionarCampoZap()" title="Adicionar mais um número"><b>+</b></button>
               </div>
             </div>
-            <small class="text-muted">Clique no [+] para adicionar número da Mãe/Pai.</small>
           </div>
           <div class="col-md-6">
             <label class="fw-bold mb-1"><i class="fas fa-envelope text-primary"></i> E-mail do Aluno</label>
             <input type="email" id="cEmail" class="form-control" placeholder="aluno@email.com">
-            <small class="text-muted">Deixe em branco se não tiver ou estiver pendente.</small>
           </div>
         </div>
-        
-        <p class="text-muted mb-3"><i class="fas fa-info-circle text-primary"></i> Verifique no CGD se as informações abaixo constam e estão corretas:</p>
         <div class="row g-3 mb-4" id="areaPerguntasDados"></div>
         <div class="text-end border-top pt-4"><button class="btn btn-theme-primary px-5 py-2 fs-5" onclick="tentarAvancar(1, 2)">Avançar <i class="fas fa-chevron-right ms-2"></i></button></div>
       </div>
@@ -186,7 +180,7 @@
           <div id="textoRelatorioInteligente" class="report-box"></div>
         </div>
         <div class="d-flex justify-content-center gap-3 border-top pt-4">
-          <button class="btn btn-secondary px-4 py-3 fw-bold" onclick="avancarSemAlerta(3)">Voltar para Editar</button>
+          <button class="btn btn-secondary px-4 py-3 fw-bold" onclick="avancarSemAlerta(3)">Voltar para Editar Checklist</button>
           <button id="btnEnviarFinal" class="btn btn-theme-primary px-5 py-3 fs-5" onclick="enviarProServidor()"><i class="fas fa-paper-plane me-2"></i> Salvar e Enviar Boas-Vindas</button>
         </div>
       </div>
@@ -201,7 +195,7 @@
     </div>
   </div>
 
-  <!-- TABELÃO DE HISTÓRICO -->
+  <!-- TABELÃO DE HISTÓRICO COM SCROLL -->
   <div id="tabelaHistorico" class="card-ui oculto">
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
       <h5 class="fw-bold m-0"><i class="fas fa-history me-2"></i> Histórico das Triagens</h5>
@@ -209,27 +203,31 @@
     </div>
     
     <div class="table-responsive tabela-scroll">
-      <table class="table table-ui table-hover text-start">
+      <table class="table table-ui table-hover text-start align-middle">
         <thead><tr><th width="12%">Data</th><th width="20%">Aluno/Colab.</th><th width="20%">Status</th><th width="25%">Relatório</th><th width="23%">Ações</th></tr></thead>
         <tbody id="corpoTabela"><tr><td colspan="5" class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin fs-4"></i><br>Carregando histórico...</td></tr></tbody>
       </table>
     </div>
   </div>
 
-  <!-- MODAIS DE EDIÇÃO/RESOLUÇÃO (AGORA FUNCIONANDO) -->
+  <!-- MODAIS DE EDIÇÃO/RESOLUÇÃO -->
   <div class="modal" tabindex="-1" id="modalDevolutiva" style="background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center;">
     <div class="modal-dialog modal-dialog-centered w-100" style="max-width: 500px;"><div class="modal-content">
-      <div class="modal-header bg-dark text-white"><h5 class="modal-title m-0">Resolver Ocorrência</h5></div>
-      <div class="modal-body"><textarea id="txtDevolutiva" class="form-control mt-2" rows="4"></textarea><input type="hidden" id="linhaAlvoDevolutiva"></div>
-      <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="fecharModais()">Cancelar</button><button type="button" class="btn btn-theme-primary" onclick="salvarDevolutiva()">Salvar</button></div>
+      <div class="modal-header bg-success text-white"><h5 class="modal-title m-0"><i class="fas fa-check-circle"></i> Resolver Ocorrência</h5></div>
+      <div class="modal-body">
+        <label class="fw-bold text-dark mb-2">Como esta pendência foi resolvida?</label>
+        <textarea id="txtDevolutiva" class="form-control" rows="3" placeholder="Ex: E-mail atualizado na ficha cadastral..."></textarea>
+        <input type="hidden" id="linhaAlvoDevolutiva">
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="fecharModais()">Cancelar</button><button type="button" class="btn btn-success fw-bold" onclick="salvarDevolutiva()">Concluir Triagem</button></div>
     </div></div>
   </div>
 
   <div class="modal" tabindex="-1" id="modalEdicao" style="background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center;">
     <div class="modal-dialog modal-dialog-centered modal-lg w-100"><div class="modal-content">
-      <div class="modal-header bg-secondary text-white"><h5 class="modal-title m-0">Editar Relatório</h5></div>
+      <div class="modal-header bg-secondary text-white"><h5 class="modal-title m-0"><i class="fas fa-edit"></i> Editar Relatório de Triagem</h5></div>
       <div class="modal-body"><textarea id="txtEdicao" class="form-control mt-1" rows="12" style="font-family: monospace; font-size:14px;"></textarea><input type="hidden" id="linhaAlvoEdicao"></div>
-      <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="fecharModais()">Cancelar</button><button type="button" class="btn btn-theme-primary" onclick="salvarEdicao()">Salvar</button></div>
+      <div class="modal-footer"><button type="button" class="btn btn-light border" onclick="fecharModais()">Cancelar</button><button type="button" class="btn btn-theme-primary fw-bold" onclick="salvarEdicao()">Salvar Alterações</button></div>
     </div></div>
   </div>
 
@@ -422,13 +420,12 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
     }
     function avancarSemAlerta(prox) { document.querySelectorAll('.passo-form').forEach(p => p.classList.add('oculto')); document.getElementById('passo' + prox).classList.remove('oculto'); }
 
-    // --- NOVA LÓGICA DO MOTOR DE INTERPRETAÇÃO INTELIGENTE ---
+    // --- MOTOR DE RELATÓRIO INTELIGENTE ---
     function analisarSistema() {
       let mat = document.getElementById('cMatricula').value || "[NÃO INFORMADA]";
       let nome = document.getElementById('cNome').value || "[NÃO INFORMADO]";
       let curso = document.getElementById('cCurso').value || "[NÃO INFORMADO]";
 
-      // 1. Analisa Cadastros
       let divergenciasCad = [];
       perguntasDados.forEach(p => {
         let sel = document.querySelector(`input[name="${p.id}"]:checked`);
@@ -437,11 +434,9 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
         else if (sel.value === "Não") divergenciasCad.push(labelLimpo);
       });
 
-      // 2. Analisa Protocolo
       let pendenciasProt = [];
       checklistTarefas.forEach(t => { if (!document.getElementById(t.id).checked) pendenciasProt.push(t.label); });
 
-      // 3. Analisa Acadêmico
       let divergenciasAcad = [];
       let rDia = document.querySelector('input[name="radDia"]:checked');
       if(!rDia) divergenciasAcad.push("Dia (Em Branco)"); else if(rDia.value === "ERRO") divergenciasAcad.push("Dia (" + document.getElementById('txtObsDia').value + ")");
@@ -450,13 +445,11 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
       let rPac = document.querySelector('input[name="radPacote"]:checked');
       if(!rPac) divergenciasAcad.push("Pacote (Em Branco)"); else if(rPac.value === "ERRO") divergenciasAcad.push("Pacote (" + document.getElementById('txtObsPac').value + ")");
 
-      // 4. Analisa Exceções
       let pPos = ""; let rPos = document.querySelector('input[name="radPos"]:checked');
       if(rPos && rPos.value === "ERRO") pPos = document.getElementById('txtObsPos').value;
       let pCuid = ""; let rCuid = document.querySelector('input[name="radCuid"]:checked');
       if(rCuid && rCuid.value === "ERRO") pCuid = document.getElementById('txtObsCuid').value;
 
-      // CONSTRÓI OS PARÁGRAFOS FLUIDOS
       let txt1 = `Durante o protocolo de acolhimento do(a) aluno(a) ${nome}, matrícula ${mat}, do curso de ${curso}, foram conferidas as informações cadastrais constantes no CGD. `;
       if(divergenciasCad.length === 0) txt1 += "Não foram identificadas divergências nos dados pessoais, escolares e contatos registrados.";
       else txt1 += `Durante a conferência, foram identificadas divergências ou ausências no(s) seguinte(s) item(ns): ${divergenciasCad.join(", ")}. Os demais dados verificados estavam de acordo com os registros disponíveis.`;
@@ -491,12 +484,10 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
       }
 
       relatorioFinalCompilado = `${txt1}\n\n${txt2}\n\n${txt3}\n\n${txtConclusao}`;
-      
       document.getElementById('textoRelatorioInteligente').innerText = relatorioFinalCompilado;
       document.getElementById('boxRelatorioGeral').classList.remove('oculto');
       avancarSemAlerta(4);
     }
-    // --------------------------------------------------------
 
     async function enviarProServidor() {
       let btn = document.getElementById('btnEnviarFinal'); 
@@ -555,16 +546,59 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
       btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Salvar e Enviar Boas-Vindas'; btn.disabled = false;
     }
 
-    // --- FUNÇÕES DE VISUALIZAÇÃO E EDIÇÃO (AGORA ATIVAS) ---
+    // --- LÓGICAS DOS BOTÕES DA TABELA DE HISTÓRICO ---
     window.mostrarRelatorioCompleto = function(idR) {
       let texto = document.getElementById('txtOrig_'+idR).innerText;
       mostrarAlertaPersonalizado("Detalhes da Ocorrência", `<div style="text-align: justify; font-family: 'Segoe UI', sans-serif; font-size: 14px; max-height: 250px; overflow-y: auto; background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #ddd;">${texto.replace(/\n/g, '<br>')}</div>`, "aviso", "Fechar");
     }
 
+    // 1. EDITAR TEXTO DA OCORRÊNCIA
     window.abrirEditar = function(linha, atendente) {
       document.getElementById('linhaAlvoEdicao').value = linha;
       document.getElementById('txtEdicao').value = document.getElementById('txtOrig_' + linha).innerText;
       document.getElementById('modalEdicao').style.display = 'flex';
+    }
+    window.salvarEdicao = async function() {
+      let linha = document.getElementById('linhaAlvoEdicao').value;
+      let novoTexto = document.getElementById('txtEdicao').value;
+      fecharModais();
+      document.getElementById('txtOrig_' + linha).innerText = novoTexto;
+      try { await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "editar_texto", linha: parseInt(linha), texto: novoTexto }) }); } catch (err) {}
+    }
+
+    // 2. RESOLVER TRIAGEM PENDENTE (DEVOLUTIVA)
+    window.abrirDevolutiva = function(linha) {
+      document.getElementById('linhaAlvoDevolutiva').value = linha;
+      document.getElementById('txtDevolutiva').value = "";
+      document.getElementById('modalDevolutiva').style.display = 'flex';
+    }
+    window.salvarDevolutiva = async function() {
+      let linha = document.getElementById('linhaAlvoDevolutiva').value;
+      let devolutiva = document.getElementById('txtDevolutiva').value.trim();
+      if(!devolutiva) { alert("Por favor, digite como o problema foi resolvido."); return; }
+      fecharModais();
+      document.getElementById("corpoTabela").innerHTML = `<tr><td colspan="5" class="text-center"><i class="fas fa-spinner fa-spin"></i> Atualizando Status...</td></tr>`;
+      try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "atualizar_status", linha: parseInt(linha), status: "RESOLVIDO", devolutiva: devolutiva }) });
+        buscarHistorico();
+      } catch (err) { alert("Erro ao concluir triagem."); buscarHistorico(); }
+    }
+
+    // 3. EXCLUIR TRIAGEM (SOFT DELETE / HARD DELETE)
+    window.excluirTriagem = async function(linha) {
+      let msgConfirmacao = isCGD ? "Deseja excluir DEFINITIVAMENTE esta triagem do sistema?" : "Deseja excluir (ocultar) esta triagem da sua tela? A coordenação ainda poderá visualizá-la.";
+      if(!confirm(msgConfirmacao)) return;
+      document.getElementById("corpoTabela").innerHTML = `<tr><td colspan="5" class="text-center"><i class="fas fa-spinner fa-spin"></i> Excluindo...</td></tr>`;
+      try {
+        if(isCGD) {
+          await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "excluir_ocorrencia", linha: parseInt(linha) }) });
+        } else {
+          let textoAtual = document.getElementById('txtOrig_' + linha).innerText;
+          let novoTexto = "[EXCLUIDO_SOFT]\n" + textoAtual;
+          await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "editar_texto", linha: parseInt(linha), texto: novoTexto }) });
+        }
+        buscarHistorico();
+      } catch(e) { alert("Erro ao excluir."); buscarHistorico(); }
     }
 
     window.fecharModais = function() {
@@ -572,20 +606,9 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
       document.getElementById('modalDevolutiva').style.display = 'none';
     }
 
-    window.salvarEdicao = async function() {
-      let linha = document.getElementById('linhaAlvoEdicao').value;
-      let novoTexto = document.getElementById('txtEdicao').value;
-      fecharModais();
-      document.getElementById('txtOrig_' + linha).innerText = novoTexto; // Atualiza a tela imediatamente
-      
-      try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "editar_texto", linha: linha, texto: novoTexto }) });
-      } catch (err) { console.log("Erro de conexão ao salvar edição."); }
-    }
-    // -------------------------------------------------------
-
     function formatarData(dStr) { if(!dStr) return ""; if(dStr.includes("T")) { let d = new Date(dStr); return d.toLocaleDateString('pt-BR') + " " + d.toLocaleTimeString('pt-BR'); } return dStr; }
     
+    // ATUALIZAÇÃO DA TABELA (INJETANDO OS 3 BOTÕES)
     async function buscarHistorico() {
       const tbody = document.getElementById("corpoTabela"); tbody.innerHTML = `<tr><td colspan="5" class="py-5 text-center"><i class="fas fa-spinner fa-spin fs-2 text-warning mb-2"></i><br>Atualizando tabela...</td></tr>`;
       try {
@@ -596,23 +619,36 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
           res.dados.reverse().forEach(linha => {
             let idR = linha[6]; let txtOriginal = linha[3]; let atendOriginal = linha[2];
             let isExcluidoSoft = txtOriginal.includes("[EXCLUIDO_SOFT]");
+            
+            // Regra: Atendente não vê se está excluído. CGD vê.
             if (isExcluidoSoft && !isCGD) return;
+            
             let isPerfeita = txtOriginal.includes("concluído com sucesso");
             let badge = "";
-            if (isExcluidoSoft) { badge = `<span class="badge bg-dark p-2 fs-6">EXCLUÍDO</span>`; txtOriginal = txtOriginal.replace("[EXCLUIDO_SOFT]\n", ""); }
+            if (isExcluidoSoft) { badge = `<span class="badge bg-dark p-2 fs-6">EXCLUÍDO (OCULTO)</span>`; txtOriginal = txtOriginal.replace("[EXCLUIDO_SOFT]\n", ""); }
             else if (isPerfeita) badge = `<span class="badge bg-success p-2 fs-6">100% OK</span>`;
             else if (linha[4] === "PENDENTE") badge = `<span class="badge bg-danger p-2 fs-6">PENDENTE</span>`;
             else badge = `<span class="badge bg-success p-2">RESOLVIDO</span>`;
+            
             let dev = linha[5] ? `<div class="bg-success text-white p-2 rounded mt-2" style="font-size:12px; white-space: pre-wrap;"><i class="fas fa-check-circle"></i> ${linha[5]}</div>` : '';
+            
+            // OS BOTÕES FICAM NESTA COLUNA (Ações)
+            let botoesAcao = `
+              <div class="d-flex flex-column gap-1">
+                ${(linha[4] === "PENDENTE" && !isExcluidoSoft && !isPerfeita) ? `<button class="btn btn-sm btn-success btn-acao text-start" onclick="abrirDevolutiva(${idR})"><i class="fas fa-check me-1"></i> Resolver</button>` : ''}
+                <button class="btn btn-sm btn-outline-dark btn-acao text-start" onclick="abrirEditar(${idR}, '${atendOriginal}')"><i class="fas fa-edit me-1"></i> Editar</button>
+                <button class="btn btn-sm btn-outline-danger btn-acao text-start" onclick="excluirTriagem(${idR})"><i class="fas fa-trash me-1"></i> Excluir</button>
+              </div>
+            `;
             
             html += `<tr><td class="text-muted fw-bold">${formatarData(linha[0])}</td>
               <td><span class="fw-bold d-block text-dark" style="font-size: 15px;">Matrícula: ${linha[1]}</span><span class="small text-muted"><i class="fas fa-user-edit"></i> ${atendOriginal}</span></td>
               <td class="text-center">${badge}${dev}</td>
               <td class="text-center">
                 <div id="txtOrig_${idR}" style="display:none;">${txtOriginal}</div>
-                <button class="btn btn-sm btn-outline-dark fw-bold" onclick="mostrarRelatorioCompleto(${idR})"><i class="fas fa-search me-1"></i> Ver</button>
+                <button class="btn btn-sm btn-secondary fw-bold" onclick="mostrarRelatorioCompleto(${idR})"><i class="fas fa-search me-1"></i> Ver Ocorrência</button>
               </td>
-              <td class="text-center" style="vertical-align: top;"><button class="btn btn-secondary btn-acao w-100" onclick="abrirEditar(${idR}, '${atendOriginal}')"><i class="fas fa-edit"></i> Editar</button></td></tr>`;
+              <td class="text-center" style="vertical-align: top; width: 140px;">${botoesAcao}</td></tr>`;
           });
           tbody.innerHTML = html;
         } else tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">Nenhum registro encontrado.</td></tr>`;
