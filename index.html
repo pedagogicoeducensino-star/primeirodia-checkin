@@ -383,7 +383,7 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
       }
     }
 
-    // --- NOVA FUNÇÃO DE CONFIRMAÇÃO ELEGANTE (SUBSTITUI O CONFIRM NATIVO) ---
+// --- NOVA FUNÇÃO DE CONFIRMAÇÃO ELEGANTE (BOTÕES PEQUENOS LADO A LADO) ---
     function mostrarConfirmacaoPersonalizada(titulo, mensagem, idLinha) {
       document.getElementById('modalAlerta').classList.remove('oculto'); 
       document.getElementById('inputAlertaPrompt').classList.add('oculto');
@@ -391,10 +391,10 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
       document.getElementById('textoAlerta').innerHTML = mensagem;
       document.getElementById('iconeAlerta').innerHTML = '<i class="fas fa-question-circle text-danger"></i>';
       
-      // Cria botões dinâmicos de exclusão
+      // Aqui eu removi o "w-100" e mudei a div pai para centralizar os botões
       document.getElementById('botoesAlerta').innerHTML = `
-        <button class="btn btn-secondary px-4 py-2 w-100 fw-bold" onclick="fecharAlerta()">Cancelar</button>
-        <button class="btn btn-danger px-4 py-2 w-100 fw-bold" onclick="executarExclusao(${idLinha})"><i class="fas fa-trash me-2"></i> Sim, Excluir</button>
+        <button class="btn btn-secondary px-4 py-2 fw-bold" onclick="fecharAlerta()">Cancelar</button>
+        <button class="btn btn-danger px-4 py-2 fw-bold" onclick="executarExclusao(${idLinha})"><i class="fas fa-trash me-2"></i> Excluir</button>
       `;
     }
     
