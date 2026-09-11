@@ -46,26 +46,31 @@
     /* SCROLL NA TABELA E CABEÇALHO FIXO */
     .tabela-scroll { max-height: 520px; overflow-y: auto; }
     .table-ui th { background-color: #f8f9fa; font-size: 13px; text-transform: uppercase; color: #555; position: sticky; top: 0; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
-    
     .btn-acao { padding: 6px 10px; font-size: 13px; margin-bottom: 5px; font-weight: bold;}
 
+    /* MODAIS COM ANIMAÇÃO FADE-IN */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(3px); }
-    .modal-custom { background: #fff; width: 90%; max-width: 480px; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); border-top: 6px solid var(--escola-laranja); }
-    .modal-custom i { font-size: 55px; margin-bottom: 15px; }
+    .modal-custom { background: #fff; width: 90%; max-width: 480px; padding: 35px; border-radius: 15px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); border-top: 6px solid var(--escola-laranja); animation: fadeIn 0.3s ease-out; }
+    .modal-custom i { font-size: 55px; margin-bottom: 20px; }
     .modal-custom h4 { font-weight: 700; color: #333; margin-bottom: 15px; }
-    .modal-custom p { color: #666; font-size: 16px; margin-bottom: 25px; line-height: 1.4;}
+    .modal-custom p { color: #666; font-size: 16px; margin-bottom: 25px; line-height: 1.5;}
+    
+    /* Estilização para o modal de Edição e Resolução não ficarem secos */
+    .modal-content { border: none; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); animation: fadeIn 0.3s ease-out;}
+    .modal-header { border-top-left-radius: 12px; border-top-right-radius: 12px; }
   </style>
 </head>
 <body>
 
-  <!-- MODAL CUSTOMIZADO DE ALERTAS -->
+  <!-- MODAL CUSTOMIZADO GERAL (ALERTAS E CONFIRMAÇÕES) -->
   <div id="modalAlerta" class="modal-overlay oculto">
     <div class="modal-custom">
       <div id="iconeAlerta"><i class="fas fa-exclamation-circle text-warning"></i></div>
       <h4 id="tituloAlerta">Atenção</h4>
       <p id="textoAlerta">Mensagem de erro aqui.</p>
       <input type="password" id="inputAlertaPrompt" class="form-control text-center mb-4 fs-5 oculto" placeholder="Digite a senha de autorização">
-      <div id="botoesAlerta" class="d-flex justify-content-center gap-2">
+      <div id="botoesAlerta" class="d-flex justify-content-center gap-3">
         <button id="btnAlertaOk" class="btn btn-theme-primary px-4 py-2 w-100" onclick="fecharAlerta()">Entendi</button>
       </div>
     </div>
@@ -92,7 +97,7 @@
           <h4 class="fw-bold m-0" style="color:var(--escola-cinza-escuro);"><i class="fas fa-edit text-theme me-2" style="color:var(--escola-laranja);"></i> Sistema de Check In e Triagem</h4>
           <span class="text-muted">Colaborador: <strong id="lblNomeColab"></strong></span>
         </div>
-        <button class="btn btn-sm btn-outline-danger" onclick="sair()"><i class="fas fa-sign-out-alt me-1"></i> Sair do Sistema</button>
+        <button class="btn btn-sm btn-outline-danger fw-bold" onclick="sair()"><i class="fas fa-sign-out-alt me-1"></i> Sair</button>
       </div>
       <div class="progress-container p-2 mb-0 border-0 shadow-none">
         <div class="d-flex justify-content-between mb-1"><small class="fw-bold fs-6">Progresso</small><small class="fw-bold fs-6" id="txtProgresso" style="color:var(--escola-laranja);">0%</small></div>
@@ -102,7 +107,6 @@
 
     <!-- WIZARD -->
     <div class="card-ui">
-      
       <!-- PASSO 1 -->
       <div id="passo1" class="passo-form">
         <h5 class="section-title">1. Informações Básicas e Conferência</h5>
@@ -191,7 +195,7 @@
   <div id="areaCGD" class="oculto">
     <div class="card-ui mb-3 p-4 d-flex justify-content-between align-items-center">
       <h4 class="fw-bold m-0"><i class="fas fa-user-shield text-dark me-2"></i> Gestão da Coordenação </h4>
-      <button class="btn btn-outline-danger px-4" onclick="sair()"><i class="fas fa-sign-out-alt me-2"></i> Sair do Sistema</button>
+      <button class="btn btn-outline-danger px-4 fw-bold" onclick="sair()"><i class="fas fa-sign-out-alt me-2"></i> Sair</button>
     </div>
   </div>
 
@@ -199,35 +203,36 @@
   <div id="tabelaHistorico" class="card-ui oculto">
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
       <h5 class="fw-bold m-0"><i class="fas fa-history me-2"></i> Histórico das Triagens</h5>
-      <button class="btn btn-outline-secondary" onclick="buscarHistorico()"><i class="fas fa-sync-alt me-2"></i> Atualizar Tabela</button>
+      <button class="btn btn-outline-secondary fw-bold" onclick="buscarHistorico()"><i class="fas fa-sync-alt me-2"></i> Atualizar Tabela</button>
     </div>
     
     <div class="table-responsive tabela-scroll">
       <table class="table table-ui table-hover text-start align-middle">
         <thead><tr><th width="12%">Data</th><th width="20%">Aluno/Colab.</th><th width="20%">Status</th><th width="25%">Relatório</th><th width="23%">Ações</th></tr></thead>
-        <tbody id="corpoTabela"><tr><td colspan="5" class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin fs-4"></i><br>Carregando histórico...</td></tr></tbody>
+        <tbody id="corpoTabela"><tr><td colspan="5" class="text-center py-5 text-muted"><i class="fas fa-spinner fa-spin fs-3 mb-3"></i><br>Carregando histórico...</td></tr></tbody>
       </table>
     </div>
   </div>
 
-  <!-- MODAIS DE EDIÇÃO/RESOLUÇÃO -->
-  <div class="modal" tabindex="-1" id="modalDevolutiva" style="background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center;">
+  <!-- MODAL DE DEVOLUTIVA (RESOLVER PENDÊNCIA) -->
+  <div class="modal" tabindex="-1" id="modalDevolutiva" style="background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999;">
     <div class="modal-dialog modal-dialog-centered w-100" style="max-width: 500px;"><div class="modal-content">
-      <div class="modal-header bg-success text-white"><h5 class="modal-title m-0"><i class="fas fa-check-circle"></i> Resolver Ocorrência</h5></div>
-      <div class="modal-body">
+      <div class="modal-header bg-success text-white py-3"><h5 class="modal-title m-0 fw-bold"><i class="fas fa-check-circle me-2"></i> Resolver Ocorrência</h5></div>
+      <div class="modal-body p-4">
         <label class="fw-bold text-dark mb-2">Como esta pendência foi resolvida?</label>
-        <textarea id="txtDevolutiva" class="form-control" rows="3" placeholder="Ex: E-mail atualizado na ficha cadastral..."></textarea>
+        <textarea id="txtDevolutiva" class="form-control" rows="4" placeholder="Ex: E-mail do aluno foi atualizado na ficha cadastral..."></textarea>
         <input type="hidden" id="linhaAlvoDevolutiva">
       </div>
-      <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="fecharModais()">Cancelar</button><button type="button" class="btn btn-success fw-bold" onclick="salvarDevolutiva()">Concluir Triagem</button></div>
+      <div class="modal-footer bg-light"><button type="button" class="btn btn-secondary px-4 fw-bold" onclick="fecharModais()">Cancelar</button><button type="button" class="btn btn-success px-4 fw-bold" onclick="salvarDevolutiva()">Concluir Triagem</button></div>
     </div></div>
   </div>
 
-  <div class="modal" tabindex="-1" id="modalEdicao" style="background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center;">
+  <!-- MODAL DE EDIÇÃO -->
+  <div class="modal" tabindex="-1" id="modalEdicao" style="background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999;">
     <div class="modal-dialog modal-dialog-centered modal-lg w-100"><div class="modal-content">
-      <div class="modal-header bg-secondary text-white"><h5 class="modal-title m-0"><i class="fas fa-edit"></i> Editar Relatório de Triagem</h5></div>
-      <div class="modal-body"><textarea id="txtEdicao" class="form-control mt-1" rows="12" style="font-family: monospace; font-size:14px;"></textarea><input type="hidden" id="linhaAlvoEdicao"></div>
-      <div class="modal-footer"><button type="button" class="btn btn-light border" onclick="fecharModais()">Cancelar</button><button type="button" class="btn btn-theme-primary fw-bold" onclick="salvarEdicao()">Salvar Alterações</button></div>
+      <div class="modal-header bg-dark text-white py-3"><h5 class="modal-title m-0 fw-bold"><i class="fas fa-edit me-2"></i> Editar Relatório de Triagem</h5></div>
+      <div class="modal-body p-4"><textarea id="txtEdicao" class="form-control mt-1" rows="12" style="font-family: monospace; font-size:14px; background: #f8f9fa; border-radius: 6px; padding: 15px;"></textarea><input type="hidden" id="linhaAlvoEdicao"></div>
+      <div class="modal-footer bg-light"><button type="button" class="btn btn-secondary px-4 fw-bold" onclick="fecharModais()">Cancelar</button><button type="button" class="btn btn-theme-primary px-4 fw-bold" onclick="salvarEdicao()">Salvar Alterações</button></div>
     </div></div>
   </div>
 
@@ -265,9 +270,8 @@ Hoje damos início a uma nova jornada de aprendizado, crescimento e muitas conqu
 ⚠️ ANTES DE COMEÇAR, LEIA COM ATENÇÃO AS INFORMAÇÕES IMPORTANTES ABAIXO: ⚠️
 
 1️⃣ Salve nossos números de atendimento
-
 Adicione estes números aos seus contatos:
-📱 (79) 8103-9888 &📱 (79) 8172-7038
+📱 (79) 8103-9888 & 📱 (79) 8172-7038
 
 2️⃣ Conheça seu contrato
 Leia atentamente o Contrato de Prestação de Serviços, entregue no momento da sua matrícula.
@@ -358,26 +362,49 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
       if(radio.value === 'Não') boxAviso.classList.remove('oculto'); else boxAviso.classList.add('oculto');
     }
 
+    // --- NOVA FUNÇÃO DE ALERTAS PERSONALIZADOS ---
     function mostrarAlertaPersonalizado(titulo, mensagem, tipoIcone, textoBotao = "Entendi", acaoSecundaria = null) {
-      document.getElementById('modalAlerta').classList.remove('oculto'); document.getElementById('inputAlertaPrompt').classList.add('oculto');
-      document.getElementById('tituloAlerta').innerText = titulo; document.getElementById('textoAlerta').innerHTML = mensagem;
+      document.getElementById('modalAlerta').classList.remove('oculto'); 
+      document.getElementById('inputAlertaPrompt').classList.add('oculto');
+      document.getElementById('tituloAlerta').innerText = titulo; 
+      document.getElementById('textoAlerta').innerHTML = mensagem;
+      
       let icone = document.getElementById('iconeAlerta');
       if(tipoIcone === 'erro') icone.innerHTML = '<i class="fas fa-times-circle text-danger"></i>';
       else if(tipoIcone === 'aviso') icone.innerHTML = '<i class="fas fa-exclamation-triangle text-warning"></i>';
       else if(tipoIcone === 'sucesso') icone.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
+      else icone.innerHTML = '<i class="fas fa-info-circle text-primary"></i>';
       
       let botoesDiv = document.getElementById('botoesAlerta');
-      if(acaoSecundaria) { botoesDiv.innerHTML = `<button class="btn btn-secondary px-4 py-2 w-100 fw-bold" onclick="fecharAlerta()">Corrigir Pendência</button><button class="btn btn-warning text-dark px-4 py-2 w-100 fw-bold" onclick="${acaoSecundaria}">Avançar assim mesmo</button>`; } 
-      else { botoesDiv.innerHTML = `<button class="btn btn-theme-primary px-4 py-2 w-100 fs-5" onclick="fecharAlerta()">${textoBotao}</button>`; }
+      if(acaoSecundaria) { 
+        botoesDiv.innerHTML = `<button class="btn btn-secondary px-4 py-2 w-100 fw-bold" onclick="fecharAlerta()">Corrigir Pendência</button><button class="btn btn-warning text-dark px-4 py-2 w-100 fw-bold" onclick="${acaoSecundaria}">Avançar assim mesmo</button>`; 
+      } else { 
+        botoesDiv.innerHTML = `<button class="btn btn-theme-primary px-4 py-2 w-100 fs-5" onclick="fecharAlerta()">${textoBotao}</button>`; 
+      }
+    }
+
+    // --- NOVA FUNÇÃO DE CONFIRMAÇÃO ELEGANTE (SUBSTITUI O CONFIRM NATIVO) ---
+    function mostrarConfirmacaoPersonalizada(titulo, mensagem, idLinha) {
+      document.getElementById('modalAlerta').classList.remove('oculto'); 
+      document.getElementById('inputAlertaPrompt').classList.add('oculto');
+      document.getElementById('tituloAlerta').innerText = titulo; 
+      document.getElementById('textoAlerta').innerHTML = mensagem;
+      document.getElementById('iconeAlerta').innerHTML = '<i class="fas fa-question-circle text-danger"></i>';
+      
+      // Cria botões dinâmicos de exclusão
+      document.getElementById('botoesAlerta').innerHTML = `
+        <button class="btn btn-secondary px-4 py-2 w-100 fw-bold" onclick="fecharAlerta()">Cancelar</button>
+        <button class="btn btn-danger px-4 py-2 w-100 fw-bold" onclick="executarExclusao(${idLinha})"><i class="fas fa-trash me-2"></i> Sim, Excluir</button>
+      `;
     }
     
     function fecharAlerta() { document.getElementById('modalAlerta').classList.add('oculto'); }
 
     function processarLogin(tipoBtn) {
       let senha = document.getElementById('inputSenha').value.trim();
-      if(!senha) return mostrarAlertaPersonalizado("Erro", "Digite a senha.", "erro");
+      if(!senha) return mostrarAlertaPersonalizado("Erro", "Digite a senha de acesso.", "erro");
       let nomeColab = usuariosPermitidos[senha]; let nomeAdmin = adminsPermitidos[senha];
-      if(tipoBtn === 'cgd') { if(nomeAdmin) { isCGD = true; atendenteLogado = nomeAdmin; salvarSessao(); restaurarSessao(); } else mostrarAlertaPersonalizado("Acesso Negado", "Sem permissão.", "erro"); } 
+      if(tipoBtn === 'cgd') { if(nomeAdmin) { isCGD = true; atendenteLogado = nomeAdmin; salvarSessao(); restaurarSessao(); } else mostrarAlertaPersonalizado("Acesso Negado", "Você não tem permissão para esta área.", "erro"); } 
       else { if(nomeAdmin || nomeColab) { isCGD = false; atendenteLogado = nomeAdmin || nomeColab; salvarSessao(); restaurarSessao(); } else mostrarAlertaPersonalizado("Acesso Negado", "Senha inválida.", "erro"); }
     }
     
@@ -405,15 +432,15 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
         if(!document.getElementById('cMatricula').value.trim() || !document.getElementById('cNome').value.trim() || !document.getElementById('cCurso').value) { return mostrarAlertaPersonalizado("Obrigatório", "Preencha a Matrícula, o Nome e o Curso do aluno.", "erro"); }
         let temVazio = false; let temNao = false;
         perguntasDados.forEach(p => { let sel = document.querySelector(`input[name="${p.id}"]:checked`); if(!sel) temVazio = true; else if(sel.value === "Não") temNao = true; });
-        if(temVazio || temNao) return mostrarAlertaPersonalizado("Divergência", "Deseja avançar sem concluir a conferência de dados?", "aviso", "", `fecharAlerta(); avancarSemAlerta(${prox});`);
+        if(temVazio || temNao) return mostrarAlertaPersonalizado("Aviso de Divergência", "Deseja avançar sem concluir a conferência de todos os dados perfeitamente?", "aviso", "", `fecharAlerta(); avancarSemAlerta(${prox});`);
       }
       if(atual === 2) {
         let todosCheck = true; checklistTarefas.forEach(t => { if(!document.getElementById(t.id).checked) todosCheck = false; });
-        if(!todosCheck) return mostrarAlertaPersonalizado("Etapas Pendentes", "Avançar sem concluir protocolo de acolhimento?", "aviso", "", `fecharAlerta(); avancarSemAlerta(${prox});`);
+        if(!todosCheck) return mostrarAlertaPersonalizado("Etapas Pendentes", "Avançar sem concluir totalmente o protocolo de acolhimento?", "aviso", "", `fecharAlerta(); avancarSemAlerta(${prox});`);
       }
       if(atual === 3) {
         let travado = false; document.querySelectorAll('.bloco-ocorrencia:not(.oculto) input').forEach(inp => { if(!inp.value.trim()) travado = true; });
-        if(travado) return mostrarAlertaPersonalizado("Campo Obrigatório", "Descreva as divergências assinaladas.", "erro");
+        if(travado) return mostrarAlertaPersonalizado("Campo Obrigatório", "Descreva detalhadamente as divergências que foram assinaladas.", "erro");
         analisarSistema(); return; 
       }
       avancarSemAlerta(prox);
@@ -519,7 +546,7 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
         let htmlBotoes = "";
         if(listaZaps.length > 0) {
           htmlBotoes += `<div class="mt-4"><p class='fw-bold mb-2 text-dark' style='font-size:14px;'>Enviar WhatsApp (${listaZaps.length} números encontrados):</p>`;
-          listaZaps.forEach((num, index) => {
+          listaZaps.forEach((num) => {
             let numLimpo = num.replace(/\D/g, ''); 
             if (numLimpo.length === 10 || numLimpo.length === 11) numLimpo = "55" + numLimpo;
             let urlZap = `whatsapp://send?phone=${numLimpo}&text=${encodeURIComponent(msgPronta)}`;
@@ -528,12 +555,12 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
           htmlBotoes += `</div><button class="btn btn-outline-secondary w-100 mt-2 fw-bold" onclick="fecharAlerta()">Finalizar Atendimento</button>`;
         } else { htmlBotoes = `<button class="btn btn-theme-primary px-4 py-2 w-100 fs-5 mt-3" onclick="fecharAlerta()">Finalizar Triagem</button>`; }
 
-        document.getElementById('modalAlerta').classList.remove('oculto');
-        document.getElementById('inputAlertaPrompt').classList.add('oculto');
-        document.getElementById('tituloAlerta').innerText = "Triagem Registrada!";
-        let statusText = email ? "<div class='alert alert-success p-2 mb-0'><i class='fas fa-envelope'></i> E-mail marketing enviado com sucesso!</div>" : "<div class='alert alert-warning p-2 mb-0'><i class='fas fa-exclamation-triangle'></i> O E-mail do aluno não foi informado.</div>";
-        document.getElementById('textoAlerta').innerHTML = statusText + htmlBotoes;
-        document.getElementById('iconeAlerta').innerHTML = '<i class="fas fa-check-circle text-success"></i>';
+        mostrarAlertaPersonalizado("Triagem Registrada com Sucesso!", 
+          (email ? "<div class='alert alert-success p-2 mb-0 border-0 shadow-sm'><i class='fas fa-envelope me-1'></i> E-mail marketing disparado!</div>" : "<div class='alert alert-warning p-2 mb-0 border-0 shadow-sm'><i class='fas fa-exclamation-triangle me-1'></i> Aluno sem E-mail cadastrado.</div>") + htmlBotoes, 
+          "sucesso", 
+          "Fechar");
+        
+        // Limpa a caixa de botões gerada no mostrarAlerta para não sobrepor o botão de fechar criado via htmlBotoes
         document.getElementById('botoesAlerta').innerHTML = ""; 
         
         document.querySelectorAll('input[type="text"], input[type="email"], select').forEach(i => i.value="");
@@ -542,14 +569,14 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
         document.getElementById("containerZaps").innerHTML = `<div class="input-group mb-2"><input type="text" class="form-control input-zap" placeholder="(00) 0 0000-0000" oninput="aplicarMascara(this)" maxlength="16"><button class="btn btn-outline-secondary" type="button" onclick="adicionarCampoZap()" title="Adicionar mais um número"><b>+</b></button></div>`;
         calcularProgresso(); avancarSemAlerta(1); buscarHistorico();
 
-      } catch(e) { mostrarAlertaPersonalizado("Erro", "Falha de Conexão.", "erro"); }
+      } catch(e) { mostrarAlertaPersonalizado("Erro de Conexão", "Não foi possível comunicar com o servidor. Tente novamente.", "erro"); }
       btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Salvar e Enviar Boas-Vindas'; btn.disabled = false;
     }
 
     // --- LÓGICAS DOS BOTÕES DA TABELA DE HISTÓRICO ---
     window.mostrarRelatorioCompleto = function(idR) {
       let texto = document.getElementById('txtOrig_'+idR).innerText;
-      mostrarAlertaPersonalizado("Detalhes da Ocorrência", `<div style="text-align: justify; font-family: 'Segoe UI', sans-serif; font-size: 14px; max-height: 250px; overflow-y: auto; background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #ddd;">${texto.replace(/\n/g, '<br>')}</div>`, "aviso", "Fechar");
+      mostrarAlertaPersonalizado("Detalhes da Ocorrência", `<div style="text-align: justify; font-family: 'Segoe UI', sans-serif; font-size: 14.5px; max-height: 300px; overflow-y: auto; background: #f8f9fa; padding: 18px; border-radius: 8px; border: 1px solid #ddd; line-height: 1.6;">${texto.replace(/\n/g, '<br>')}</div>`, "aviso", "Fechar Janela");
     }
 
     // 1. EDITAR TEXTO DA OCORRÊNCIA
@@ -575,30 +602,55 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
     window.salvarDevolutiva = async function() {
       let linha = document.getElementById('linhaAlvoDevolutiva').value;
       let devolutiva = document.getElementById('txtDevolutiva').value.trim();
-      if(!devolutiva) { alert("Por favor, digite como o problema foi resolvido."); return; }
+      
+      // Validação usando nosso modal elegante
+      if(!devolutiva) { 
+        mostrarAlertaPersonalizado("Campo Obrigatório", "Por favor, digite como a pendência foi resolvida antes de concluir.", "aviso"); 
+        return; 
+      }
+      
       fecharModais();
-      document.getElementById("corpoTabela").innerHTML = `<tr><td colspan="5" class="text-center"><i class="fas fa-spinner fa-spin"></i> Atualizando Status...</td></tr>`;
+      document.getElementById("corpoTabela").innerHTML = `<tr><td colspan="5" class="text-center py-5"><i class="fas fa-spinner fa-spin fs-2 text-success"></i><br>Atualizando Status...</td></tr>`;
       try {
         await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "atualizar_status", linha: parseInt(linha), status: "RESOLVIDO", devolutiva: devolutiva }) });
         buscarHistorico();
-      } catch (err) { alert("Erro ao concluir triagem."); buscarHistorico(); }
+      } catch (err) { mostrarAlertaPersonalizado("Erro", "Não foi possível atualizar a triagem.", "erro"); buscarHistorico(); }
     }
 
-    // 3. EXCLUIR TRIAGEM (SOFT DELETE / HARD DELETE)
-    window.excluirTriagem = async function(linha) {
-      let msgConfirmacao = isCGD ? "Deseja excluir DEFINITIVAMENTE esta triagem do sistema?" : "Deseja excluir (ocultar) esta triagem da sua tela? A coordenação ainda poderá visualizá-la.";
-      if(!confirm(msgConfirmacao)) return;
-      document.getElementById("corpoTabela").innerHTML = `<tr><td colspan="5" class="text-center"><i class="fas fa-spinner fa-spin"></i> Excluindo...</td></tr>`;
+    // 3. EXCLUIR TRIAGEM (A MÁGICA ACONTECE AQUI)
+    window.excluirTriagem = function(linha) {
+      let msgConfirmacao = isCGD 
+        ? "Deseja excluir <b>DEFINITIVAMENTE</b> esta triagem do sistema? Esta ação não pode ser desfeita." 
+        : "Deseja excluir (ocultar) esta triagem da sua tela? A coordenação continuará visualizando-a como <b>EXCLUÍDA</b>.";
+      
+      // Chamamos o novo modal estilizado para confirmação
+      mostrarConfirmacaoPersonalizada("Confirmação de Exclusão", msgConfirmacao, linha);
+    }
+    
+    // Essa função é chamada pelo botão vermelho gerado dentro do modal de confirmação
+    window.executarExclusao = async function(linha) {
+      fecharAlerta();
+      document.getElementById("corpoTabela").innerHTML = `<tr><td colspan="5" class="text-center py-5"><i class="fas fa-spinner fa-spin fs-2 text-danger mb-3"></i><br>Processando exclusão...</td></tr>`;
+      
       try {
         if(isCGD) {
+          // Hard Delete (Deleta a linha na planilha)
           await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "excluir_ocorrencia", linha: parseInt(linha) }) });
         } else {
+          // Soft Delete (Adiciona a tag no início do texto)
           let textoAtual = document.getElementById('txtOrig_' + linha).innerText;
-          let novoTexto = "[EXCLUIDO_SOFT]\n" + textoAtual;
-          await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "editar_texto", linha: parseInt(linha), texto: novoTexto }) });
+          // Evita adicionar a tag mais de uma vez se der algum duplo clique rápido
+          if(!textoAtual.includes("[EXCLUIDO_SOFT]")) {
+            let novoTexto = "[EXCLUIDO_SOFT]\n" + textoAtual;
+            await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "editar_texto", linha: parseInt(linha), texto: novoTexto }) });
+          }
         }
+        // Ao recarregar o histórico, ele lerá a tag [EXCLUIDO_SOFT] e não mostrará pro Atendente
         buscarHistorico();
-      } catch(e) { alert("Erro ao excluir."); buscarHistorico(); }
+      } catch(e) { 
+        mostrarAlertaPersonalizado("Falha na Conexão", "Houve um erro ao tentar excluir. Atualize a página e tente novamente.", "erro"); 
+        buscarHistorico(); 
+      }
     }
 
     window.fecharModais = function() {
@@ -606,11 +658,11 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
       document.getElementById('modalDevolutiva').style.display = 'none';
     }
 
-    function formatarData(dStr) { if(!dStr) return ""; if(dStr.includes("T")) { let d = new Date(dStr); return d.toLocaleDateString('pt-BR') + " " + d.toLocaleTimeString('pt-BR'); } return dStr; }
+    function formatarData(dStr) { if(!dStr) return ""; if(dStr.includes("T")) { let d = new Date(dStr); return d.toLocaleDateString('pt-BR') + " " + d.toLocaleTimeString('pt-BR').substring(0,5); } return dStr; }
     
-    // ATUALIZAÇÃO DA TABELA (INJETANDO OS 3 BOTÕES)
+    // ATUALIZAÇÃO DA TABELA
     async function buscarHistorico() {
-      const tbody = document.getElementById("corpoTabela"); tbody.innerHTML = `<tr><td colspan="5" class="py-5 text-center"><i class="fas fa-spinner fa-spin fs-2 text-warning mb-2"></i><br>Atualizando tabela...</td></tr>`;
+      const tbody = document.getElementById("corpoTabela"); tbody.innerHTML = `<tr><td colspan="5" class="py-5 text-center"><i class="fas fa-spinner fa-spin fs-2 text-warning mb-3"></i><br>Carregando registros...</td></tr>`;
       try {
         let response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "buscar_ocorrencias" }) });
         let res = await response.json();
@@ -620,39 +672,41 @@ Leia atentamente o Projeto Didático-Pedagógico do seu Curso.
             let idR = linha[6]; let txtOriginal = linha[3]; let atendOriginal = linha[2];
             let isExcluidoSoft = txtOriginal.includes("[EXCLUIDO_SOFT]");
             
-            // Regra: Atendente não vê se está excluído. CGD vê.
+            // Regra crucial: Se o colaborador estiver logado e a triagem estiver ocultada, nem carrega o HTML dela.
             if (isExcluidoSoft && !isCGD) return;
             
             let isPerfeita = txtOriginal.includes("concluído com sucesso");
             let badge = "";
-            if (isExcluidoSoft) { badge = `<span class="badge bg-dark p-2 fs-6">EXCLUÍDO (OCULTO)</span>`; txtOriginal = txtOriginal.replace("[EXCLUIDO_SOFT]\n", ""); }
-            else if (isPerfeita) badge = `<span class="badge bg-success p-2 fs-6">100% OK</span>`;
-            else if (linha[4] === "PENDENTE") badge = `<span class="badge bg-danger p-2 fs-6">PENDENTE</span>`;
-            else badge = `<span class="badge bg-success p-2">RESOLVIDO</span>`;
+            if (isExcluidoSoft) { badge = `<span class="badge bg-dark px-3 py-2 fs-6 shadow-sm"><i class="fas fa-eye-slash me-1"></i> EXCLUÍDO</span>`; txtOriginal = txtOriginal.replace("[EXCLUIDO_SOFT]\n", ""); }
+            else if (isPerfeita) badge = `<span class="badge bg-success px-3 py-2 fs-6 shadow-sm"><i class="fas fa-check me-1"></i> 100% OK</span>`;
+            else if (linha[4] === "PENDENTE") badge = `<span class="badge bg-danger px-3 py-2 fs-6 shadow-sm"><i class="fas fa-clock me-1"></i> PENDENTE</span>`;
+            else badge = `<span class="badge bg-success px-3 py-2 shadow-sm"><i class="fas fa-check-double me-1"></i> RESOLVIDO</span>`;
             
-            let dev = linha[5] ? `<div class="bg-success text-white p-2 rounded mt-2" style="font-size:12px; white-space: pre-wrap;"><i class="fas fa-check-circle"></i> ${linha[5]}</div>` : '';
+            let dev = linha[5] ? `<div class="bg-success text-white p-2 rounded mt-2 border border-success border-opacity-25" style="font-size:12px; white-space: pre-wrap;"><i class="fas fa-check-circle me-1"></i> ${linha[5]}</div>` : '';
             
-            // OS BOTÕES FICAM NESTA COLUNA (Ações)
+            // OS BOTÕES (Omitindo botão de Resolver se já foi perfeito ou excluído)
             let botoesAcao = `
-              <div class="d-flex flex-column gap-1">
-                ${(linha[4] === "PENDENTE" && !isExcluidoSoft && !isPerfeita) ? `<button class="btn btn-sm btn-success btn-acao text-start" onclick="abrirDevolutiva(${idR})"><i class="fas fa-check me-1"></i> Resolver</button>` : ''}
-                <button class="btn btn-sm btn-outline-dark btn-acao text-start" onclick="abrirEditar(${idR}, '${atendOriginal}')"><i class="fas fa-edit me-1"></i> Editar</button>
-                <button class="btn btn-sm btn-outline-danger btn-acao text-start" onclick="excluirTriagem(${idR})"><i class="fas fa-trash me-1"></i> Excluir</button>
+              <div class="d-flex flex-column gap-2">
+                ${(linha[4] === "PENDENTE" && !isExcluidoSoft && !isPerfeita) ? `<button class="btn btn-sm btn-success btn-acao text-start shadow-sm" onclick="abrirDevolutiva(${idR})"><i class="fas fa-check me-1"></i> Resolver</button>` : ''}
+                <button class="btn btn-sm btn-outline-dark btn-acao text-start shadow-sm" onclick="abrirEditar(${idR}, '${atendOriginal}')"><i class="fas fa-edit me-1"></i> Editar</button>
+                <button class="btn btn-sm btn-outline-danger btn-acao text-start shadow-sm" onclick="excluirTriagem(${idR})"><i class="fas fa-trash me-1"></i> Excluir</button>
               </div>
             `;
             
-            html += `<tr><td class="text-muted fw-bold">${formatarData(linha[0])}</td>
-              <td><span class="fw-bold d-block text-dark" style="font-size: 15px;">Matrícula: ${linha[1]}</span><span class="small text-muted"><i class="fas fa-user-edit"></i> ${atendOriginal}</span></td>
+            html += `<tr class="align-middle border-bottom">
+              <td class="text-muted fw-bold" style="font-size:14px;"><i class="far fa-calendar-alt me-1"></i> ${formatarData(linha[0])}</td>
+              <td><span class="fw-bold d-block text-dark" style="font-size: 15px;">MAT: ${linha[1]}</span><span class="small text-muted"><i class="fas fa-user-edit text-primary me-1"></i> ${atendOriginal}</span></td>
               <td class="text-center">${badge}${dev}</td>
               <td class="text-center">
                 <div id="txtOrig_${idR}" style="display:none;">${txtOriginal}</div>
-                <button class="btn btn-sm btn-secondary fw-bold" onclick="mostrarRelatorioCompleto(${idR})"><i class="fas fa-search me-1"></i> Ver Ocorrência</button>
+                <button class="btn btn-sm btn-secondary fw-bold shadow-sm" onclick="mostrarRelatorioCompleto(${idR})"><i class="fas fa-file-alt me-1"></i> Ler Relatório</button>
               </td>
-              <td class="text-center" style="vertical-align: top; width: 140px;">${botoesAcao}</td></tr>`;
+              <td class="text-center" style="width: 140px;">${botoesAcao}</td></tr>`;
           });
-          tbody.innerHTML = html;
+          
+          tbody.innerHTML = html || `<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">Nenhum registro ativo encontrado.</td></tr>`;
         } else tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">Nenhum registro encontrado.</td></tr>`;
-      } catch (err) { tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-danger fw-bold">Erro de conexão.</td></tr>`; }
+      } catch (err) { tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-danger fw-bold"><i class="fas fa-wifi"></i> Erro de conexão com o banco de dados.</td></tr>`; }
     }
   </script>
 </body>
