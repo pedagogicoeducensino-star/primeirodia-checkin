@@ -279,9 +279,11 @@
 
     function aplicarMascara(input) { let v = input.value.replace(/\D/g, ""); if (v.length > 11) v = v.slice(0, 11); if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`; if (v.length > 9) v = `${v.slice(0, 10)}-${v.slice(10)}`; input.value = v; }
     
-    function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
-      let div = document.createElement("div"); div.className = "input-group mb-2 bloco-zap";
-      div.innerHTML = `<input type="text" class="form-control input-zap form-coleta" placeholder="(00) 0 0000-0000" oninput="aplicarMascara(this)" maxlength="16" value="${numeroVal}">
+function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
+      let div = document.createElement("div"); 
+      div.className = "input-group mb-2 bloco-zap";
+      div.innerHTML = `
+        <input type="text" class="form-control input-zap form-coleta" placeholder="(00) 0 0000-0000" oninput="aplicarMascara(this)" maxlength="16" value="${numeroVal}">
         <select class="form-select tipo-zap form-coleta" style="max-width: 135px;">
           <option value="Aluno" ${tipoVal==='Aluno'?'selected':''}>Aluno(a)</option>
           <option value="Mãe" ${tipoVal==='Mãe'?'selected':''}>Mãe</option>
@@ -289,7 +291,9 @@
           <option value="Responsável" ${tipoVal==='Responsável'?'selected':''}>Responsável</option>
           <option value="Outro" ${tipoVal==='Outro'?'selected':''}>Outro</option>
         </select>
-        <button class="btn btn-outline-danger" type="button" onclick="this.parentElement.remove()" title="Remover"><i class="fas fa-trash"></i></button>`;
+        <button class="btn btn-outline-secondary fw-bold fs-5 px-3" type="button" onclick="adicionarCampoZap()" title="Adicionar mais um número">+</button>
+        <button class="btn btn-outline-danger px-3" type="button" onclick="this.parentElement.remove()" title="Remover"><i class="fas fa-trash"></i></button>
+      `;
       document.getElementById("containerZaps").appendChild(div);
     }
 
