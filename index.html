@@ -288,7 +288,11 @@ function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
           <option value="Aluno" ${tipoVal==='Aluno'?'selected':''}>Aluno(a)</option>
           <option value="Mãe" ${tipoVal==='Mãe'?'selected':''}>Mãe</option>
           <option value="Pai" ${tipoVal==='Pai'?'selected':''}>Pai</option>
-          <option value="Responsável" ${tipoVal==='Responsável'?'selected':''}>Responsável</option>
+          <option value="Emergência" ${tipoVal==='Emergência'?'selected':''}>Emergência</option>
+          <option value="Avó" ${tipoVal==='Avó'?'selected':''}>Avó</option>
+          <option value="Avô" ${tipoVal==='Avô'?'selected':''}>Avô</option>
+          <option value="Esposo(a)" ${tipoVal==='Esposo(a)'?'selected':''}>Esposo(a)</option>
+          <option value="Irmão" ${tipoVal==='Irmão'?'selected':''}>Irmão</option>
           <option value="Outro" ${tipoVal==='Outro'?'selected':''}>Outro</option>
         </select>
         <button class="btn btn-outline-secondary fw-bold fs-5 px-3" type="button" onclick="adicionarCampoZap()" title="Adicionar mais um número">+</button>
