@@ -546,56 +546,112 @@ function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
       btn.disabled = false;
     }
 
-// --- MAGIA DA EDIÇÃO (REABRIR O FORMULÁRIO COM TUDO PREENCHIDO) ---
+// --- MAGIA DA EDIÇÃO BLINDADA CONTRA ERROS ---
     window.abrirEditarCompleto = function(linha) {
       try {
-        let cache = cacheDadosGlobais.find(c => c.idLinha === linha);
-        if(!cache || !cache.jsonRaw || cache.jsonRaw === "{}") {
-           mostrarAlertaPersonalizado("Aviso", "Esta triagem é muito antiga e não tem os dados completos salvos no servidor.", "aviso");
+        let cache = cacheDadosGlobais.find(c => c.idLinha == linha);
+        
+        // 1. Verifica se a célula G (JSON) existe e não está vazia
+        if(!cache || !cache.jsonRaw || typeof cache.jsonRaw !== 'string' || cache.jsonRaw.trim() === "" || cache.jsonRaw === "{}") {
+           mostrarAlertaPersonalizado("Aviso", "Esta triagem é antiga ou não possui os dados salvos na base. Você só pode editar triagens novas.", "aviso");
            return;
         }
         
-        let fData = JSON.parse(cache.jsonRaw);
+        let fData;
+        try {
+          fData = JSON.parse(cache.jsonRaw); // Tenta ler o código
+        } catch(e) {
+          mostrarAlertaPersonalizado("Aviso", "Os dados salvos desta triagem estão corrompidos na planilha.", "aviso");
+          return;
+        }
+
+        if(typeof fData !== 'object' || fData === null) {
+            mostrarAlertaPersonalizado("Aviso", "Formato de dados inválido na planilha.", "aviso");
+            return;
+        }
+
         limparFormulario();
         
-        // Repovoando dados básicos
-        document.getElementById('cMatricula').value = fData.cMatricula || ""; 
-        document.getElementById('cNome').value = fData.cNome || "";
-        document.getElementById('cCurso').value = fData.cCurso || ""; 
-        document.getElementById('cEmail').value = fData.cEmail || "";
-        document.getElementById('chkAutorizacaoZap').checked = fData.chkAutorizacaoZap || false;
+        // 2. Repovoando dados básicos com segurança
+        if(document.getElementById('cMatricula')) document.getElementById('cMatricula').value = fData.cMatricula || ""; 
+        if(document.getElementById('cNome')) document.getElementById('cNome').value = fData.cNome || "";
+        if(document.getElementById('cCurso')) document.getElementById('cCurso').value = fData.cCurso || ""; 
+        if(document.getElementById('cEmail')) document.getElementById('cEmail').value = fData.cEmail || "";
         
-        // Repovoando os Zaps
-        document.getElementById("containerZaps").innerHTML = '';
-        if(fData.zaps && fData.zaps.length > 0) { fData.zaps.forEach(z => adicionarCampoZap(z.numero, z.tipo)); } else { adicionarCampoZap(); }
+        let chkZap = document.getElementById('chkAutorizacaoZap');
+        if(chkZap) chkZap.checked = fData.chkAutorizacaoZap || false;
+        
+        let containerZaps = document.getElementById("containerZaps");
+        if(containerZaps) containerZaps.innerHTML = '';
+        
+        if(fData.zaps && Array.isArray(fData.zaps) && fData.zaps.length > 0) { 
+            fData.zaps.forEach(z => adicionarCampoZap(z.numero || "", z.tipo || "Aluno")); 
+        } else { 
+            adicionarCampoZap(); 
+        }
 
-        // Repovoando Checklist e Radios
-        perguntasDados.forEach(p => { if(fData[p.id]) { let el = document.querySelector(`input[name="${p.id}"][value="${fData[p.id]}"]`); if(el) { el.checked = true; verificarNao(el); } } });
-        checklistTarefas.forEach(t => { if(fData[t.id]) document.getElementById(t.id).checked = true; });
-        ["radDia", "radHorario", "radPacote", "radPos", "radCuid"].forEach(n => { if(fData[n]) { let el = document.querySelector(`input[name="${n}"][value="${fData[n]}"]`); if(el) { el.checked = true; toggleBox('obs'+n.replace('rad',''), (fData[n]==='ERRO')); } } });
+        // 3. Repovoando Checklist e Radios
+        if(perguntasDados && Array.isArray(perguntasDados)) {
+            perguntasDados.forEach(p => { 
+                if(fData[p.id]) { 
+                    let el = document.querySelector(`input[name="${p.id}"][value="${fData[p.id]}"]`); 
+                    if(el) { el.checked = true; verificarNao(el); } 
+                } 
+            });
+        }
         
-        // Repovoando Textos de Observação
+        if(checklistTarefas && Array.isArray(checklistTarefas)) {
+            checklistTarefas.forEach(t => { 
+                if(fData[t.id]) {
+                    let chk = document.getElementById(t.id);
+                    if(chk) chk.checked = true;
+                } 
+            });
+        }
+        
+        ["radDia", "radHorario", "radPacote", "radPos", "radCuid"].forEach(n => { 
+            if(fData[n]) { 
+                let el = document.querySelector(`input[name="${n}"][value="${fData[n]}"]`); 
+                if(el) { 
+                    el.checked = true; 
+                    toggleBox('obs'+n.replace('rad',''), (fData[n]==='ERRO')); 
+                } 
+            } 
+        });
+        
+        // 4. Repovoando Textos de Observação
         if(fData.obs) {
-          ["txtObsDia", "txtObsHora", "txtObsPac", "txtObsPos", "txtObsCuid"].forEach(o => { if(fData.obs[o]) { let obEl = document.getElementById(o); if(obEl) obEl.value = fData.obs[o]; } });
+          ["txtObsDia", "txtObsHora", "txtObsPac", "txtObsPos", "txtObsCuid"].forEach(o => { 
+              if(fData.obs[o]) { 
+                  let obEl = document.getElementById(o); 
+                  if(obEl) obEl.value = fData.obs[o]; 
+              } 
+          });
         }
 
         calcularProgresso();
         idLinhaEdicaoAtual = linha;
         
-        document.getElementById('btnEnviarFinal').innerHTML = '<i class="fas fa-save me-2"></i> Atualizar Respostas';
-        document.getElementById("tabelaHistorico").classList.add("oculto");
-        document.getElementById("areaColaborador").classList.remove("oculto");
+        // 5. Atualizando a interface
+        let btnFinal = document.getElementById('btnEnviarFinal');
+        if(btnFinal) btnFinal.innerHTML = '<i class="fas fa-save me-2"></i> Atualizar Respostas';
         
-        // Garante que o botão voltar aparece na edição
+        let tabHist = document.getElementById("tabelaHistorico");
+        if(tabHist) tabHist.classList.add("oculto");
+        
+        let areaColab = document.getElementById("areaColaborador");
+        if(areaColab) areaColab.classList.remove("oculto");
+        
         let btnVoltar = document.getElementById("btnVoltarHistorico");
         if(btnVoltar) btnVoltar.classList.remove("oculto");
         
         avancarSemAlerta(1);
+        
       } catch (err) {
-        mostrarAlertaPersonalizado("Erro de Leitura", "Houve uma falha ao tentar remontar este formulário.", "erro");
+        // Agora, se algo der errado, ele vai dizer EXATAMENTE o que quebrou:
+        mostrarAlertaPersonalizado("Erro Específico", "Falha técnica: " + err.message, "erro");
       }
     }
-
     // --- DEVOLUTIVA NORMAL (RESOLVER OCORRÊNCIA) ---
     window.abrirDevolutiva = function(linha) { document.getElementById('linhaAlvoDevolutiva').value = linha; document.getElementById('txtDevolutiva').value = ""; document.getElementById('modalDevolutiva').style.display = 'flex'; }
     window.salvarDevolutiva = async function() {
