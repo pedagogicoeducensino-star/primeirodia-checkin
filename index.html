@@ -127,7 +127,7 @@
       <div id="passo1" class="passo-form">
         <h5 class="section-title">1. Informações Básicas e Conferência</h5>
         <div class="row g-3 mb-4 bg-light p-3 rounded border">
-          <div class="col-md-3"><label class="fw-bold mb-1">Matrícula *</label><input type="text" id="cMatricula" class="form-control form-coleta" placeholder="Ex: 1254"></div>
+          <div class="col-md-3"><label class="fw-bold mb-1">Matrícula *</label><input type="text" id="cMatricula" class="form-control form-coleta" placeholder="Ex: 1254" onblur="verificarMatriculaDuplicada(this.value)"></div>
           <div class="col-md-5"><label class="fw-bold mb-1">Nome do Aluno(a) *</label><input type="text" id="cNome" class="form-control form-coleta" placeholder="Nome completo"></div>
           <div class="col-md-4"><label class="fw-bold mb-1">Curso Principal *</label>
             <select id="cCurso" class="form-select form-coleta">
@@ -253,6 +253,15 @@
     let atendenteLogado = ""; let isCGD = false; let relatorioFinalCompilado = ""; let pctFinal = 0;
     let idLinhaEdicaoAtual = null; 
     let cacheDadosGlobais = []; 
+    let matriculasCadastradas = []; // Guarda as matrículas para não duplicar
+
+    function verificarMatriculaDuplicada(mat) {
+      if(!mat || idLinhaEdicaoAtual !== null) return; // Não barra se estiver editando um erro antigo
+      if(matriculasCadastradas.includes(mat.trim())) {
+        mostrarAlertaPersonalizado("Matrícula já Cadastrada!", "O aluno com a matrícula <b>" + mat + "</b> já possui uma triagem no histórico. Cancele e busque na tabela caso queira editá-la.", "aviso");
+        document.getElementById('cMatricula').value = ""; // Limpa o campo
+      }
+    }
 
     const perguntasDados = [ { id: "radD1", lbl: "Nome do Aluno(a) está correto?" }, { id: "radD2", lbl: "Data de Nascimento confere?" }, { id: "radD3", lbl: "CPF do Aluno(a) está correto?" }, { id: "radD4", lbl: "Nome da Escola e Período estão corretos?" }, { id: "radD5", lbl: "Foi cadastrado o E-mail do Aluno(a)?" }, { id: "radD6", lbl: "Foi cadastrado o E-mail do Responsável?" }, { id: "radD7", lbl: "Foi cadastrado o Telefone do Aluno(a)?" }, { id: "radD8", lbl: "Foi cadastrado o Telefone do Responsável?" }, { id: "radD9", lbl: "Foi cadastrado o Telefone de Emergência?" } ];
     const checklistTarefas = [ { id: "chkP2", label: "Solicitar ao Aluno(a) que salve os dois números da Sala de Aula" }, { id: "chkP3", label: "Funcionário salvou os contatos do Aluno conforme Protocolo" }, { id: "chkP4", label: "Registrar a senha do Aluno(a) conforme protocolo" }, { id: "chkP5", label: "Liberar o acesso à primeira Disciplina do Aluno(a)" }, { id: "chkP6", label: "Tirar foto do Aluno(a) e inserir no sistema" }, { id: "chkP7", label: "Conduzir o Aluno(a) ao seu lugar e Orientá-la" } ];
@@ -537,36 +546,54 @@ function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
       btn.disabled = false;
     }
 
-    // --- MAGIA DA EDIÇÃO (REABRIR O FORMULÁRIO COM TUDO PREENCHIDO) ---
+// --- MAGIA DA EDIÇÃO (REABRIR O FORMULÁRIO COM TUDO PREENCHIDO) ---
     window.abrirEditarCompleto = function(linha) {
-      let cache = cacheDadosGlobais.find(c => c.idLinha === linha);
-      if(!cache || !cache.jsonRaw || cache.jsonRaw === "{}") {
-         mostrarAlertaPersonalizado("Aviso", "Esta triagem é muito antiga e não salvou os dados dos botões. Não é possível editar o formulário completo, mas você pode deixar um comentário de devolução.", "aviso");
-         return;
+      try {
+        let cache = cacheDadosGlobais.find(c => c.idLinha === linha);
+        if(!cache || !cache.jsonRaw || cache.jsonRaw === "{}") {
+           mostrarAlertaPersonalizado("Aviso", "Esta triagem é muito antiga e não tem os dados completos salvos no servidor.", "aviso");
+           return;
+        }
+        
+        let fData = JSON.parse(cache.jsonRaw);
+        limparFormulario();
+        
+        // Repovoando dados básicos
+        document.getElementById('cMatricula').value = fData.cMatricula || ""; 
+        document.getElementById('cNome').value = fData.cNome || "";
+        document.getElementById('cCurso').value = fData.cCurso || ""; 
+        document.getElementById('cEmail').value = fData.cEmail || "";
+        document.getElementById('chkAutorizacaoZap').checked = fData.chkAutorizacaoZap || false;
+        
+        // Repovoando os Zaps
+        document.getElementById("containerZaps").innerHTML = '';
+        if(fData.zaps && fData.zaps.length > 0) { fData.zaps.forEach(z => adicionarCampoZap(z.numero, z.tipo)); } else { adicionarCampoZap(); }
+
+        // Repovoando Checklist e Radios
+        perguntasDados.forEach(p => { if(fData[p.id]) { let el = document.querySelector(`input[name="${p.id}"][value="${fData[p.id]}"]`); if(el) { el.checked = true; verificarNao(el); } } });
+        checklistTarefas.forEach(t => { if(fData[t.id]) document.getElementById(t.id).checked = true; });
+        ["radDia", "radHorario", "radPacote", "radPos", "radCuid"].forEach(n => { if(fData[n]) { let el = document.querySelector(`input[name="${n}"][value="${fData[n]}"]`); if(el) { el.checked = true; toggleBox('obs'+n.replace('rad',''), (fData[n]==='ERRO')); } } });
+        
+        // Repovoando Textos de Observação
+        if(fData.obs) {
+          ["txtObsDia", "txtObsHora", "txtObsPac", "txtObsPos", "txtObsCuid"].forEach(o => { if(fData.obs[o]) { let obEl = document.getElementById(o); if(obEl) obEl.value = fData.obs[o]; } });
+        }
+
+        calcularProgresso();
+        idLinhaEdicaoAtual = linha;
+        
+        document.getElementById('btnEnviarFinal').innerHTML = '<i class="fas fa-save me-2"></i> Atualizar Respostas';
+        document.getElementById("tabelaHistorico").classList.add("oculto");
+        document.getElementById("areaColaborador").classList.remove("oculto");
+        
+        // Garante que o botão voltar aparece na edição
+        let btnVoltar = document.getElementById("btnVoltarHistorico");
+        if(btnVoltar) btnVoltar.classList.remove("oculto");
+        
+        avancarSemAlerta(1);
+      } catch (err) {
+        mostrarAlertaPersonalizado("Erro de Leitura", "Houve uma falha ao tentar remontar este formulário.", "erro");
       }
-      
-      let fData = JSON.parse(cache.jsonRaw);
-      limparFormulario();
-      
-      document.getElementById('cMatricula').value = fData.cMatricula || ""; document.getElementById('cNome').value = fData.cNome || "";
-      document.getElementById('cCurso').value = fData.cCurso || ""; document.getElementById('cEmail').value = fData.cEmail || "";
-      document.getElementById('chkAutorizacaoZap').checked = fData.chkAutorizacaoZap || false;
-      
-      document.getElementById("containerZaps").innerHTML = '';
-      if(fData.zaps && fData.zaps.length > 0) { fData.zaps.forEach(z => adicionarCampoZap(z.numero, z.tipo)); } else { adicionarCampoZap(); }
-
-      perguntasDados.forEach(p => { if(fData[p.id]) { let el = document.querySelector(`input[name="${p.id}"][value="${fData[p.id]}"]`); if(el) { el.checked = true; verificarNao(el); } } });
-      checklistTarefas.forEach(t => { if(fData[t.id]) document.getElementById(t.id).checked = true; });
-      ["radDia", "radHorario", "radPacote", "radPos", "radCuid"].forEach(n => { if(fData[n]) { let el = document.querySelector(`input[name="${n}"][value="${fData[n]}"]`); if(el) { el.checked = true; toggleBox('obs'+n.replace('rad',''), (fData[n]==='ERRO')); } } });
-      ["txtObsDia", "txtObsHora", "txtObsPac", "txtObsPos", "txtObsCuid"].forEach(o => { if(fData.obs && fData.obs[o]) document.getElementById(o).value = fData.obs[o]; });
-
-      calcularProgresso();
-      idLinhaEdicaoAtual = linha;
-      
-      document.getElementById('btnEnviarFinal').innerHTML = '<i class="fas fa-save me-2"></i> Atualizar Respostas';
-      document.getElementById("tabelaHistorico").classList.add("oculto");
-      document.getElementById("areaColaborador").classList.remove("oculto");
-      avancarSemAlerta(1);
     }
 
     // --- DEVOLUTIVA NORMAL (RESOLVER OCORRÊNCIA) ---
@@ -598,13 +625,19 @@ function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
 
     function formatarData(dStr) { if(!dStr) return ""; if(dStr.includes("T")) { let d = new Date(dStr); return d.toLocaleDateString('pt-BR') + " " + d.toLocaleTimeString('pt-BR').substring(0,5); } return dStr; }
     
+    // --- ATUALIZAÇÃO DA TABELA ---
     async function buscarHistorico() {
       const tbody = document.getElementById("corpoTabela"); tbody.innerHTML = `<tr><td colspan="5" class="py-5 text-center"><i class="fas fa-spinner fa-spin fs-2 text-warning mb-3"></i><br>Carregando registros...</td></tr>`;
       try {
         let response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "buscar_ocorrencias" }) });
         let res = await response.json();
         if (res.sucesso && res.dados.length > 0) {
-          cacheDadosGlobais = []; let html = "";
+          cacheDadosGlobais = []; 
+          
+          // Alimenta o array de matriculas para bloquear duplicados
+          matriculasCadastradas = res.dados.map(r => r[1] ? r[1].toString().trim() : "");
+          
+          let html = "";
           res.dados.reverse().forEach(linha => {
             let idR = linha[7]; let txtOriginal = linha[3]; let atendOriginal = linha[2]; let JSONRaw = linha[6];
             cacheDadosGlobais.push({ idLinha: idR, jsonRaw: JSONRaw });
