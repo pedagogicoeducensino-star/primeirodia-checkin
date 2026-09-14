@@ -564,7 +564,20 @@
     }
 
     window.fecharModais = function() { document.getElementById('modalDevolutiva').style.display = 'none'; }
-    window.mostrarRelatorioCompleto = function(idR) { let txt = document.getElementById('txtOrig_'+idR).innerText; mostrarAlertaPersonalizado("Relatório Gerado", `<div style="text-align: justify; max-height: 250px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 8px;">${txt.replace(/\n/g, '<br>')}</div>`, "info", "Fechar"); }
+   window.mostrarRelatorioCompleto = function(idR) { 
+      let txt = document.getElementById('txtOrig_'+idR).innerText; 
+      
+      let conteudoModal = `
+        <div style="text-align: justify; max-height: 250px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+          ${txt.replace(/\n/g, '<br>')}
+        </div>
+        <button class="btn btn-outline-primary w-100 fw-bold py-2" onclick="navigator.clipboard.writeText(document.getElementById('txtOrig_${idR}').innerText); this.innerHTML='<i class=\\'fas fa-check\\'></i> Copiado!'; setTimeout(() => this.innerHTML='<i class=\\'fas fa-copy\\'></i> Copiar Relatório', 2000);">
+          <i class="fas fa-copy"></i> Copiar Relatório
+        </button>
+      `;
+
+      mostrarAlertaPersonalizado("Relatório Gerado", conteudoModal, "info", "Fechar"); 
+    }
 
     function formatarData(dStr) { if(!dStr) return ""; if(dStr.includes("T")) { let d = new Date(dStr); return d.toLocaleDateString('pt-BR') + " " + d.toLocaleTimeString('pt-BR').substring(0,5); } return dStr; }
     
