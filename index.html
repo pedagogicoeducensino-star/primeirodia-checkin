@@ -497,7 +497,7 @@
       avancarSemAlerta(4);
     }
 
-    async function enviarProServidor() {
+async function enviarProServidor() {
       let btn = document.getElementById('btnEnviarFinal'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...'; btn.disabled = true;
       let formDict = extrairRespostasFormulario();
       let email = document.getElementById('cEmail').value.trim();
@@ -506,11 +506,14 @@
       
       let strZap = formDict.zaps.map(z => z.numero + " (" + z.tipo + ")").join(" | ");
 
+      // CORREÇÃO DA LÓGICA DE STATUS: Ele checa o texto real do relatório
+      let situacaoReal = relatorioFinalCompilado.includes("concluído com sucesso") ? "OK" : "COM OCORRÊNCIA";
+
       let payload = { 
         acao: "salvar_triagem",
         autorizaZap: formDict.chkAutorizacaoZap,
         formData: formDict, 
-        dados: { atendente: atendenteLogado, aluno: formDict.cMatricula, nome: formDict.cNome, curso: formDict.cCurso, zap: strZap || "Pendente", email: email || "Pendente", mensagemCompleta: msgPronta, statusChecklist: pctFinal + "%", situacaoGeral: (pctFinal < 100) ? "COM OCORRÊNCIA" : "OK" },
+        dados: { atendente: atendenteLogado, aluno: formDict.cMatricula, nome: formDict.cNome, curso: formDict.cCurso, zap: strZap || "Pendente", email: email || "Pendente", mensagemCompleta: msgPronta, statusChecklist: pctFinal + "%", situacaoGeral: situacaoReal },
         ocorrenciaGeral: relatorioFinalCompilado 
       };
 
@@ -568,12 +571,14 @@
       let txt = document.getElementById('txtOrig_'+idR).innerText; 
       
       let conteudoModal = `
-        <div style="text-align: justify; max-height: 250px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <div style="text-align: justify; max-height: 250px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 12px; font-size: 14px;">
           ${txt.replace(/\n/g, '<br>')}
         </div>
-        <button class="btn btn-outline-primary w-100 fw-bold py-2" onclick="navigator.clipboard.writeText(document.getElementById('txtOrig_${idR}').innerText); this.innerHTML='<i class=\\'fas fa-check\\'></i> Copiado!'; setTimeout(() => this.innerHTML='<i class=\\'fas fa-copy\\'></i> Copiar Relatório', 2000);">
-          <i class="fas fa-copy"></i> Copiar Relatório
-        </button>
+        <div class="text-center">
+          <button class="btn btn-sm btn-outline-primary fw-bold px-4" onclick="navigator.clipboard.writeText(document.getElementById('txtOrig_${idR}').innerText); this.innerHTML='<i class=\\'fas fa-check\\'></i> Copiado!'; setTimeout(() => this.innerHTML='<i class=\\'fas fa-copy\\'></i> Copiar Relatório', 2000);">
+            <i class="fas fa-copy"></i> Copiar Relatório
+          </button>
+        </div>
       `;
 
       mostrarAlertaPersonalizado("Relatório Gerado", conteudoModal, "info", "Fechar"); 
