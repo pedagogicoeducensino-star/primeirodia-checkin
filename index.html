@@ -581,7 +581,12 @@
           
           let html = "";
           res.dados.reverse().forEach(linha => {
-            let idR = linha[7]; let txtOriginal = linha[3]; let atendOriginal = linha[2];
+            
+            // CORREÇÃO BLINDADA: Agora ele puxa o ID da linha lendo sempre a última posição, 
+            // não importa se tem 7, 8 ou 50 colunas no Apps Script!
+            let idR = linha[linha.length - 1]; 
+            let txtOriginal = linha[3]; 
+            let atendOriginal = linha[2];
             
             let isPerfeita = txtOriginal.includes("concluído com sucesso");
             let badge = "";
