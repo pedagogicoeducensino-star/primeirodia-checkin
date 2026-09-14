@@ -113,7 +113,7 @@
     <div class="card-ui mb-3" style="padding: 15px;">
       <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
         <h4 class="fw-bold m-0" style="color:var(--escola-cinza-escuro);"><i class="fas fa-edit text-theme me-2" style="color:var(--escola-laranja);"></i> Formulário de Triagem</h4>
-        <button id="btnVoltarHistorico" class="btn btn-sm btn-secondary fw-bold" onclick="cancelarEdicao()"><i class="fas fa-arrow-left me-1"></i> Voltar à Tabela</button>
+        <button class="btn btn-sm btn-secondary fw-bold" onclick="cancelarEdicao()"><i class="fas fa-arrow-left me-1"></i> Voltar à Tabela</button>
       </div>
       <div class="progress-container p-2 mb-0 border-0 shadow-none">
         <div class="d-flex justify-content-between mb-1"><small class="fw-bold fs-6">Progresso</small><small class="fw-bold fs-6" id="txtProgresso" style="color:var(--escola-laranja);">0%</small></div>
@@ -224,9 +224,7 @@
   </div>
 
   <script>
-    // ==========================================
     const API_URL = "https://script.google.com/macros/s/AKfycbwcQ1NknZmyTl07nc3EHJJJoh_Tu6mAFhFYHpFr-kkHTn0jodP2b3y5DuUpyMLdn1XL/exec"; 
-    // ==========================================
 
     const LINKS_PDPC = { 
       "Assistente Administrativo Plus": "https://drive.google.com/file/d/1SL5Ho6FHmd2HvjCF9MLHhNcwG2jgK3jY/view?usp=sharing",
@@ -251,15 +249,13 @@
     const adminsPermitidos = { "1312892099": "Davi", "2490": "Convidado(a)" };
 
     let atendenteLogado = ""; let isCGD = false; let relatorioFinalCompilado = ""; let pctFinal = 0;
-    let idLinhaEdicaoAtual = null; 
-    let cacheDadosGlobais = []; 
-    let matriculasCadastradas = []; // Guarda as matrículas para não duplicar
+    let matriculasCadastradas = []; 
 
     function verificarMatriculaDuplicada(mat) {
-      if(!mat || idLinhaEdicaoAtual !== null) return; // Não barra se estiver editando um erro antigo
+      if(!mat) return;
       if(matriculasCadastradas.includes(mat.trim())) {
-        mostrarAlertaPersonalizado("Matrícula já Cadastrada!", "O aluno com a matrícula <b>" + mat + "</b> já possui uma triagem no histórico. Cancele e busque na tabela caso queira editá-la.", "aviso");
-        document.getElementById('cMatricula').value = ""; // Limpa o campo
+        mostrarAlertaPersonalizado("Matrícula já Cadastrada!", "O aluno com a matrícula <b>" + mat + "</b> já possui uma triagem no histórico.", "aviso");
+        document.getElementById('cMatricula').value = ""; 
       }
     }
 
@@ -278,7 +274,6 @@
       document.querySelectorAll('.tracker').forEach(el => { el.addEventListener('change', calcularProgresso); });
       adicionarCampoZap();
       
-      // MUDANÇA PARA LOCALSTORAGE (Persiste mesmo fechando a aba/atualizando)
       if(localStorage.getItem('logadoEduc') === 'true') { 
         atendenteLogado = localStorage.getItem('nomeEduc'); 
         isCGD = (localStorage.getItem('isCGDEduc') === 'true'); 
@@ -288,7 +283,7 @@
 
     function aplicarMascara(input) { let v = input.value.replace(/\D/g, ""); if (v.length > 11) v = v.slice(0, 11); if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`; if (v.length > 9) v = `${v.slice(0, 10)}-${v.slice(10)}`; input.value = v; }
     
-function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
+    function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
       let div = document.createElement("div"); 
       div.className = "input-group mb-2 bloco-zap";
       div.innerHTML = `
@@ -351,10 +346,9 @@ function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
     
     function restaurarSessao() {
       document.getElementById("telaLogin").classList.add("oculto"); 
-      document.getElementById("painelUsuario").classList.remove("oculto"); // CABEÇALHO GLOBAL APARECE AQUI
+      document.getElementById("painelUsuario").classList.remove("oculto"); 
       document.getElementById("tabelaHistorico").classList.remove("oculto");
       
-      // Ajusta o nome no cabeçalho Global
       if(isCGD) {
         document.getElementById("lblIdentificacao").innerHTML = "Coordenação: <strong class='text-danger'>" + atendenteLogado + "</strong>";
       } else {
@@ -373,7 +367,6 @@ function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
 
     function iniciarNovaTriagem() {
       limparFormulario();
-      idLinhaEdicaoAtual = null;
       document.getElementById('btnEnviarFinal').innerHTML = '<i class="fas fa-paper-plane me-2"></i> Salvar e Enviar Boas-Vindas';
       document.getElementById("tabelaHistorico").classList.add("oculto");
       document.getElementById("areaColaborador").classList.remove("oculto");
@@ -421,7 +414,6 @@ function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
     }
     function avancarSemAlerta(prox) { document.querySelectorAll('.passo-form').forEach(p => p.classList.add('oculto')); document.getElementById('passo' + prox).classList.remove('oculto'); }
 
-    // --- COLETAR TODOS OS DADOS DO FORMULÁRIO (PARA PODER EDITAR DEPOIS) ---
     function extrairRespostasFormulario() {
       let dict = { zaps: [], obs: {} };
       document.querySelectorAll('.form-coleta').forEach(el => {
@@ -515,143 +507,38 @@ function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
       let strZap = formDict.zaps.map(z => z.numero + " (" + z.tipo + ")").join(" | ");
 
       let payload = { 
-        isEdicao: (idLinhaEdicaoAtual !== null), idLinha: idLinhaEdicaoAtual, autorizaZap: formDict.chkAutorizacaoZap,
+        acao: "salvar_triagem",
+        autorizaZap: formDict.chkAutorizacaoZap,
         formData: formDict, 
         dados: { atendente: atendenteLogado, aluno: formDict.cMatricula, nome: formDict.cNome, curso: formDict.cCurso, zap: strZap || "Pendente", email: email || "Pendente", mensagemCompleta: msgPronta, statusChecklist: pctFinal + "%", situacaoGeral: (pctFinal < 100) ? "COM OCORRÊNCIA" : "OK" },
         ocorrenciaGeral: relatorioFinalCompilado 
       };
 
       try {
-        let response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "salvar_triagem", ...payload }) });
+        let response = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
         let result = await response.json();
         if(!result.sucesso) throw new Error("Erro do script.");
         
         let htmlWhats = "";
-        if(!payload.isEdicao && formDict.zaps.length > 0) {
+        if(formDict.zaps.length > 0) {
           htmlWhats += `<div class="mt-4"><p class='fw-bold text-dark mb-2'>Enviar Boas-Vindas no WhatsApp:</p>`;
           formDict.zaps.forEach(z => {
              let numLimpo = z.numero.replace(/\D/g, ''); if(numLimpo.length <= 11) numLimpo = "55" + numLimpo;
-             htmlWhats += `<a href="whatsapp://send?phone=${numLimpo}&text=${encodeURIComponent(msgPronta)}" target="_blank" class="btn btn-success d-block mb-2 shadow-sm"><i class="fab fa-whatsapp me-2"></i> Chamar ${z.numero} (${z.tipo})</a>`;
+             // Correção de Link para o Servidor: O uso da api web não trava no ambiente Windows Server.
+             htmlWhats += `<a href="https://api.whatsapp.com/send?phone=${numLimpo}&text=${encodeURIComponent(msgPronta)}" target="_blank" class="btn btn-success d-block mb-2 shadow-sm"><i class="fab fa-whatsapp me-2"></i> Chamar ${z.numero} (${z.tipo})</a>`;
           });
           htmlWhats += `</div><button class="btn btn-outline-secondary w-100 mt-2 fw-bold" onclick="fecharAlerta(); cancelarEdicao(); buscarHistorico();">Voltar ao Histórico</button>`;
         } else {
           htmlWhats = `<button class="btn btn-theme-primary px-4 py-2 w-100 fs-5 mt-3" onclick="fecharAlerta(); cancelarEdicao(); buscarHistorico();">Voltar ao Histórico</button>`;
         }
 
-        let tituloSalvo = payload.isEdicao ? "Triagem Atualizada!" : "Triagem Salva e Contato Criado!";
-        mostrarAlertaPersonalizado(tituloSalvo, htmlWhats, "sucesso", "Fechar");
+        mostrarAlertaPersonalizado("Triagem Salva com Sucesso!", htmlWhats, "sucesso", "Fechar");
         document.getElementById('botoesAlerta').innerHTML = ""; // Limpa botao duplicado
 
       } catch(e) { mostrarAlertaPersonalizado("Erro de Conexão", "Não foi possível comunicar com o servidor. Tente novamente.", "erro"); }
       btn.disabled = false;
     }
 
-// --- MAGIA DA EDIÇÃO BLINDADA CONTRA ERROS ---
-    window.abrirEditarCompleto = function(linha) {
-      try {
-        let cache = cacheDadosGlobais.find(c => c.idLinha == linha);
-        
-        // 1. Verifica se a célula G (JSON) existe e não está vazia
-        if(!cache || !cache.jsonRaw || typeof cache.jsonRaw !== 'string' || cache.jsonRaw.trim() === "" || cache.jsonRaw === "{}") {
-           mostrarAlertaPersonalizado("Aviso", "Esta triagem é antiga ou não possui os dados salvos na base. Você só pode editar triagens novas.", "aviso");
-           return;
-        }
-        
-        let fData;
-        try {
-          fData = JSON.parse(cache.jsonRaw); // Tenta ler o código
-        } catch(e) {
-          mostrarAlertaPersonalizado("Aviso", "Os dados salvos desta triagem estão corrompidos na planilha.", "aviso");
-          return;
-        }
-
-        if(typeof fData !== 'object' || fData === null) {
-            mostrarAlertaPersonalizado("Aviso", "Formato de dados inválido na planilha.", "aviso");
-            return;
-        }
-
-        limparFormulario();
-        
-        // 2. Repovoando dados básicos com segurança
-        if(document.getElementById('cMatricula')) document.getElementById('cMatricula').value = fData.cMatricula || ""; 
-        if(document.getElementById('cNome')) document.getElementById('cNome').value = fData.cNome || "";
-        if(document.getElementById('cCurso')) document.getElementById('cCurso').value = fData.cCurso || ""; 
-        if(document.getElementById('cEmail')) document.getElementById('cEmail').value = fData.cEmail || "";
-        
-        let chkZap = document.getElementById('chkAutorizacaoZap');
-        if(chkZap) chkZap.checked = fData.chkAutorizacaoZap || false;
-        
-        let containerZaps = document.getElementById("containerZaps");
-        if(containerZaps) containerZaps.innerHTML = '';
-        
-        if(fData.zaps && Array.isArray(fData.zaps) && fData.zaps.length > 0) { 
-            fData.zaps.forEach(z => adicionarCampoZap(z.numero || "", z.tipo || "Aluno")); 
-        } else { 
-            adicionarCampoZap(); 
-        }
-
-        // 3. Repovoando Checklist e Radios
-        if(perguntasDados && Array.isArray(perguntasDados)) {
-            perguntasDados.forEach(p => { 
-                if(fData[p.id]) { 
-                    let el = document.querySelector(`input[name="${p.id}"][value="${fData[p.id]}"]`); 
-                    if(el) { el.checked = true; verificarNao(el); } 
-                } 
-            });
-        }
-        
-        if(checklistTarefas && Array.isArray(checklistTarefas)) {
-            checklistTarefas.forEach(t => { 
-                if(fData[t.id]) {
-                    let chk = document.getElementById(t.id);
-                    if(chk) chk.checked = true;
-                } 
-            });
-        }
-        
-        ["radDia", "radHorario", "radPacote", "radPos", "radCuid"].forEach(n => { 
-            if(fData[n]) { 
-                let el = document.querySelector(`input[name="${n}"][value="${fData[n]}"]`); 
-                if(el) { 
-                    el.checked = true; 
-                    toggleBox('obs'+n.replace('rad',''), (fData[n]==='ERRO')); 
-                } 
-            } 
-        });
-        
-        // 4. Repovoando Textos de Observação
-        if(fData.obs) {
-          ["txtObsDia", "txtObsHora", "txtObsPac", "txtObsPos", "txtObsCuid"].forEach(o => { 
-              if(fData.obs[o]) { 
-                  let obEl = document.getElementById(o); 
-                  if(obEl) obEl.value = fData.obs[o]; 
-              } 
-          });
-        }
-
-        calcularProgresso();
-        idLinhaEdicaoAtual = linha;
-        
-        // 5. Atualizando a interface
-        let btnFinal = document.getElementById('btnEnviarFinal');
-        if(btnFinal) btnFinal.innerHTML = '<i class="fas fa-save me-2"></i> Atualizar Respostas';
-        
-        let tabHist = document.getElementById("tabelaHistorico");
-        if(tabHist) tabHist.classList.add("oculto");
-        
-        let areaColab = document.getElementById("areaColaborador");
-        if(areaColab) areaColab.classList.remove("oculto");
-        
-        let btnVoltar = document.getElementById("btnVoltarHistorico");
-        if(btnVoltar) btnVoltar.classList.remove("oculto");
-        
-        avancarSemAlerta(1);
-        
-      } catch (err) {
-        // Agora, se algo der errado, ele vai dizer EXATAMENTE o que quebrou:
-        mostrarAlertaPersonalizado("Erro Específico", "Falha técnica: " + err.message, "erro");
-      }
-    }
     // --- DEVOLUTIVA NORMAL (RESOLVER OCORRÊNCIA) ---
     window.abrirDevolutiva = function(linha) { document.getElementById('linhaAlvoDevolutiva').value = linha; document.getElementById('txtDevolutiva').value = ""; document.getElementById('modalDevolutiva').style.display = 'flex'; }
     window.salvarDevolutiva = async function() {
@@ -661,7 +548,7 @@ function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
       try { await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "atualizar_status", linha: parseInt(linha), status: "RESOLVIDO", devolutiva: devolutiva }) }); buscarHistorico(); } catch(e) { mostrarAlertaPersonalizado("Erro", "Falha de rede.", "erro"); buscarHistorico(); }
     }
 
-    // --- EXCLUSÃO CORRIGIDA COM TRATAMENTO DE ERRO DE TIMEOUT ---
+    // --- EXCLUSÃO COM TRATAMENTO DE ERRO DE TIMEOUT ---
     window.excluirTriagem = function(linha) { mostrarConfirmacaoPersonalizada("Confirmação", "Tem certeza que deseja excluir esta triagem definitivamente?", linha); }
     window.executarExclusao = async function(linha) {
       fecharAlerta(); document.getElementById("corpoTabela").innerHTML = `<tr><td colspan="5" class="text-center py-5"><i class="fas fa-spinner fa-spin fs-2 text-danger mb-3"></i><br>Deletando registro...</td></tr>`;
@@ -671,7 +558,7 @@ function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
         if(!result.sucesso) throw new Error(result.erro);
         buscarHistorico();
       } catch(e) { 
-        mostrarAlertaPersonalizado("Falha na Comunicação", "Ocorreu um erro. Verifique se você gerou uma NOVA VERSÃO no Apps Script conforme as instruções.", "erro"); 
+        mostrarAlertaPersonalizado("Falha na Comunicação", "Ocorreu um erro. Tente novamente.", "erro"); 
         buscarHistorico(); 
       }
     }
@@ -688,15 +575,13 @@ function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
         let response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: "buscar_ocorrencias" }) });
         let res = await response.json();
         if (res.sucesso && res.dados.length > 0) {
-          cacheDadosGlobais = []; 
           
           // Alimenta o array de matriculas para bloquear duplicados
           matriculasCadastradas = res.dados.map(r => r[1] ? r[1].toString().trim() : "");
           
           let html = "";
           res.dados.reverse().forEach(linha => {
-            let idR = linha[7]; let txtOriginal = linha[3]; let atendOriginal = linha[2]; let JSONRaw = linha[6];
-            cacheDadosGlobais.push({ idLinha: idR, jsonRaw: JSONRaw });
+            let idR = linha[7]; let txtOriginal = linha[3]; let atendOriginal = linha[2];
             
             let isPerfeita = txtOriginal.includes("concluído com sucesso");
             let badge = "";
@@ -705,12 +590,11 @@ function adicionarCampoZap(numeroVal = "", tipoVal = "Aluno") {
             else badge = `<span class="badge bg-success px-3 py-2 shadow-sm"><i class="fas fa-check-double me-1"></i> RESOLVIDO</span>`;
             let dev = linha[5] ? `<div class="bg-success text-white p-2 rounded mt-2 shadow-sm" style="font-size:12px; white-space: pre-wrap;"><i class="fas fa-check-circle me-1"></i> ${linha[5]}</div>` : '';
             
-            // --- REGRA DE SEGURANÇA: Só CGD ou o Dono da Triagem pode ver os botões de Ação ---
+            // --- REGRA DE SEGURANÇA (Apenas Resolver e Excluir) ---
             let botoesAcao = ``;
             if(isCGD || atendOriginal === atendenteLogado) {
                botoesAcao = `<div class="d-flex flex-column gap-2">
                  ${(linha[4] === "PENDENTE" && !isPerfeita) ? `<button class="btn btn-sm btn-success btn-acao shadow-sm" onclick="abrirDevolutiva(${idR})">Resolver</button>` : ''}
-                 <button class="btn btn-sm btn-outline-dark btn-acao shadow-sm" onclick="abrirEditarCompleto(${idR})">Refazer Form</button>
                  <button class="btn btn-sm btn-outline-danger btn-acao shadow-sm" onclick="excluirTriagem(${idR})">Excluir</button>
                </div>`;
             } else { botoesAcao = `<span class="text-muted small fw-bold"><i class="fas fa-lock me-1"></i> Sem permissão</span>`; }
