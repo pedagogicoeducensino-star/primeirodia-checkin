@@ -571,8 +571,9 @@ window.fecharModais = function() { document.getElementById('modalDevolutiva').st
 window.mostrarRelatorioCompleto = function(idR) { 
       let txt = document.getElementById('txtOrig_'+idR).innerText; 
       
+      // 1. Caixa de texto mais alta (max-height: 350px) e com borda sutil
       let conteudoModal = `
-        <div style="text-align: justify; max-height: 250px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 14px;">
+        <div style="text-align: justify; max-height: 350px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 14px; border: 1px solid #e0e0e0;">
           ${txt.replace(/\n/g, '<br>')}
         </div>
       `;
@@ -580,13 +581,16 @@ window.mostrarRelatorioCompleto = function(idR) {
       // Chama o modal base
       mostrarAlertaPersonalizado("Relatório Gerado", conteudoModal, "info"); 
       
-      // Substitui os botões de baixo por duas versões pequenas, compactas (btn-sm) e laranjas
+      // 2. Alarga a janela do modal para caber mais texto confortavelmente
+      document.querySelector('.modal-custom').style.maxWidth = '650px';
+      
+      // 3. Botões corrigidos: Forcei o tamanho do ícone para 14px para não herdar os 55px do CSS
       let botoesDiv = document.getElementById('botoesAlerta');
       botoesDiv.innerHTML = `
-        <button class="btn btn-theme-primary btn-sm px-3 py-1 fw-bold" onclick="navigator.clipboard.writeText(document.getElementById('txtOrig_${idR}').innerText); this.innerHTML='<i class=\\'fas fa-check\\'></i> Copiado!'; setTimeout(() => this.innerHTML='<i class=\\'fas fa-copy\\'></i> Copiar', 2000);">
-          <i class="fas fa-copy"></i> Copiar
+        <button class="btn btn-theme-primary px-4 py-2 fw-bold" style="font-size: 14px;" onclick="navigator.clipboard.writeText(document.getElementById('txtOrig_${idR}').innerText); this.innerHTML='<i class=\\'fas fa-check\\' style=\\'font-size: 14px; margin-bottom: 0;\\'></i> Copiado!'; setTimeout(() => this.innerHTML='<i class=\\'fas fa-copy\\' style=\\'font-size: 14px; margin-bottom: 0;\\'></i> Copiar', 2000);">
+          <i class="fas fa-copy" style="font-size: 14px; margin-bottom: 0;"></i> Copiar
         </button>
-        <button class="btn btn-theme-primary btn-sm px-3 py-1 fw-bold" onclick="fecharAlerta()">
+        <button class="btn btn-secondary px-4 py-2 fw-bold" style="font-size: 14px;" onclick="fecharAlerta(); document.querySelector('.modal-custom').style.maxWidth = '480px';">
           Fechar
         </button>
       `;
