@@ -568,7 +568,7 @@ async function enviarProServidor() {
 
 window.fecharModais = function() { document.getElementById('modalDevolutiva').style.display = 'none'; }
     
-    window.mostrarRelatorioCompleto = function(idR) { 
+window.mostrarRelatorioCompleto = function(idR) { 
       let txt = document.getElementById('txtOrig_'+idR).innerText; 
       
       let conteudoModal = `
@@ -577,14 +577,19 @@ window.fecharModais = function() { document.getElementById('modalDevolutiva').st
         </div>
       `;
 
-      mostrarAlertaPersonalizado("Relatório Gerado", conteudoModal, "info", "Fechar"); 
+      // Chama o modal base
+      mostrarAlertaPersonalizado("Relatório Gerado", conteudoModal, "info"); 
       
+      // Substitui os botões de baixo por duas versões pequenas, compactas (btn-sm) e laranjas
       let botoesDiv = document.getElementById('botoesAlerta');
-      botoesDiv.insertAdjacentHTML('afterbegin', `
-        <button class="btn btn-theme-primary px-3 py-2 fw-bold fs-6" onclick="navigator.clipboard.writeText(document.getElementById('txtOrig_${idR}').innerText); this.innerHTML='<i class=\\'fas fa-check\\'></i> Copiado!'; setTimeout(() => this.innerHTML='<i class=\\'fas fa-copy\\'></i> Copiar', 2000);">
+      botoesDiv.innerHTML = `
+        <button class="btn btn-theme-primary btn-sm px-3 py-1 fw-bold" onclick="navigator.clipboard.writeText(document.getElementById('txtOrig_${idR}').innerText); this.innerHTML='<i class=\\'fas fa-check\\'></i> Copiado!'; setTimeout(() => this.innerHTML='<i class=\\'fas fa-copy\\'></i> Copiar', 2000);">
           <i class="fas fa-copy"></i> Copiar
         </button>
-      `);
+        <button class="btn btn-theme-primary btn-sm px-3 py-1 fw-bold" onclick="fecharAlerta()">
+          Fechar
+        </button>
+      `;
     }
 
     function formatarData(dStr) { if(!dStr) return ""; if(dStr.includes("T")) { let d = new Date(dStr); return d.toLocaleDateString('pt-BR') + " " + d.toLocaleTimeString('pt-BR').substring(0,5); } return dStr; }
